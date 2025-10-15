@@ -1,0 +1,41 @@
+name: adguard-home
+image: adguard/adguardhome:latest
+
+variables:
+  - name: WORK_DIR
+    label: "Work Directory"
+    type: path
+    default: "/opt/adguard/work"
+    description: "Stores query logs, statistics, etc. Should be mapped to a host directory."
+  - name: CONF_DIR
+    label: "Config Directory"
+    type: path
+    default: "/opt/adguard/conf"
+    description: "Stores AdGuardHome.yaml and other configuration. Should be mapped to a host directory."
+
+ports:
+  - name: "DNS"
+    host: 53
+    container: 53
+    protocol: "tcp"
+    description: "Main DNS query port."
+  - name: "DNS_UDP"
+    host: 53
+    container: 53
+    protocol: "udp"
+    description: "Main DNS query port (UDP)."
+  - name: "WebUI_Setup"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "Web interface for initial setup."
+  - name: "WebUI"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "Main web interface port (after setup). Using 8080 on host to avoid conflicts."
+  - name: "DNS_over_TLS"
+    host: 853
+    container: 853
+    protocol: "tcp"
+    description: "Port for DNS-over-TLS."

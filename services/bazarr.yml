@@ -1,0 +1,42 @@
+name: bazarr
+description: "Bazarr is a companion application to Sonarr and Radarr. It manages and downloads subtitles based on your requirements."
+image: linuxserver/bazarr:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions. See https://docs.linuxserver.io/general/understanding-puid-and-pgid"
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/opt/bazarr/config"
+    description: "Host path for Bazarr configuration, database, and metadata."
+  - name: MOVIES_PATH
+    label: "Movies Path"
+    type: path
+    default: "/data/movies"
+    description: "Host path where your movie files are located for subtitle processing."
+  - name: TV_PATH
+    label: "TV Shows Path"
+    type: path
+    default: "/data/tvshows"
+    description: "Host path where your TV show files are located for subtitle processing."
+
+ports:
+  - name: "WebUI"
+    host: 6767
+    container: 6767
+    protocol: "tcp"
+    description: "Main web interface for Bazarr."

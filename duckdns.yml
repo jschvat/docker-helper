@@ -1,0 +1,3 @@
+duckdns:
+  domain: my-domain.duckdns.org
+  token: my-token

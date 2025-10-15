@@ -1,0 +1,42 @@
+name: sonarr
+description: "Smart PVR for newsgroup and bittorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them."
+image: linuxserver/sonarr:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions. See https://docs.linuxserver.io/general/understanding-puid-and-pgid"
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/opt/sonarr/config"
+    description: "Host path for Sonarr configuration, database, and metadata."
+  - name: TV_PATH
+    label: "TV Shows Path"
+    type: path
+    default: "/data/tvshows"
+    description: "Host path where your TV show media files are stored and managed by Sonarr."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/data/downloads"
+    description: "Host path where your download client places completed downloads for Sonarr to process."
+
+ports:
+  - name: "WebUI"
+    host: 8989
+    container: 8989
+    protocol: "tcp"
+    description: "Main web interface for Sonarr."

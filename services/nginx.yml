@@ -1,0 +1,31 @@
+name: nginx
+image: nginx:latest
+
+variables:
+  - name: CONFIG_PATH
+    label: "Nginx Config File/Path"
+    type: path
+    default: "/etc/nginx/conf.d"
+    description: "Path on the host containing your nginx .conf files."
+  - name: LOG_PATH
+    label: "Log Path"
+    type: path
+    default: "/var/log/nginx"
+    description: "Path on the host for Nginx log files."
+  - name: WEBROOT_PATH
+    label: "Web Root"
+    type: path
+    default: "/usr/share/nginx/html"
+    description: "Path on the host for your website's static files."
+
+ports:
+  - name: "HTTP"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "Standard HTTP port."
+  - name: "HTTPS"
+    host: 443
+    container: 443
+    protocol: "tcp"
+    description: "Standard HTTPS port."

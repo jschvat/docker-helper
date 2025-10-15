@@ -1,0 +1,92 @@
+name: plex
+description: "Plex Media Server organizes video, music and photos from personal collections and streams them to smart TVs, streaming boxes and mobile devices."
+image: linuxserver/plex:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions. See https://docs.linuxserver.io/general/understanding-puid-and-pgid"
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: VERSION
+    label: "Plex Version"
+    type: string
+    default: "docker"
+    description: "Set to 'public' for public beta versions, or a specific version number."
+  - name: PLEX_CLAIM
+    label: "Plex Claim Token"
+    type: string
+    default: ""
+    description: "Claim token to link server to your Plex account. Get from https://plex.tv/claim. Expires in 4 minutes."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/opt/plex/config"
+    description: "Host path for Plex configuration, database, and metadata."
+  - name: TRANSCODE_PATH
+    label: "Transcode Path"
+    type: path
+    default: "/opt/plex/transcode"
+    description: "Host path for temporary transcode files."
+  - name: MEDIA_PATH_TV
+    label: "TV Shows Path"
+    type: path
+    default: "/data/tvshows"
+    description: "Host path where your TV show media files are stored."
+  - name: MEDIA_PATH_MOVIES
+    label: "Movies Path"
+    type: path
+    default: "/data/movies"
+    description: "Host path where your movie media files are stored."
+
+ports:
+  - name: "WebUI"
+    host: 32400
+    container: 32400
+    protocol: "tcp"
+    description: "Main web interface and API access."
+  - name: "DLNA_TCP"
+    host: 32469
+    container: 32469
+    protocol: "tcp"
+    description: "DLNA Server."
+  - name: "DLNA_UDP"
+    host: 1900
+    container: 1900
+    protocol: "udp"
+    description: "DLNA Server."
+  - name: "Discovery_UDP_1"
+    host: 5353
+    container: 5353
+    protocol: "udp"
+    description: "Network discovery (Bonjour)."
+  - name: "Discovery_TCP_1"
+    host: 32410
+    container: 32410
+    protocol: "tcp"
+    description: "Network discovery (GDM)."
+  - name: "Discovery_UDP_2"
+    host: 32412
+    container: 32412
+    protocol: "udp"
+    description: "Network discovery (GDM)."
+  - name: "Discovery_UDP_3"
+    host: 32413
+    container: 32413
+    protocol: "udp"
+    description: "Network discovery (GDM)."
+  - name: "Discovery_UDP_4"
+    host: 32414
+    container: 32414
+    protocol: "udp"
+    description: "Network discovery (GDM)."

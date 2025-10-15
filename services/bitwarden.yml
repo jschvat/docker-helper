@@ -1,0 +1,42 @@
+name: bitwarden
+description: "A self-hosted password manager using the Vaultwarden backend."
+image: vaultwarden/server:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/opt/vaultwarden/data"
+    description: "Host path to store all persistent Vaultwarden data."
+  - name: SIGNUPS_ALLOWED
+    label: "Allow Signups"
+    type: boolean
+    default: false
+    description: "Allow new users to register. Set to true for initial setup."
+  - name: ADMIN_TOKEN
+    label: "Admin Token"
+    type: string
+    default: ""
+    description: "A secure, random string to access the admin panel at /admin."
+  - name: DOMAIN
+    label: "Domain URL"
+    type: string
+    default: "https://localhost:8080"
+    description: "The full URL where Vaultwarden will be accessible."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+
+ports:
+  - name: "HTTP"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "Main HTTP port for the web vault."
+  - name: "Websocket"
+    host: 3012
+    container: 3012
+    protocol: "tcp"
+    description: "Port for websocket server (for real-time sync)."

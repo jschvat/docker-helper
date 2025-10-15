@@ -1,0 +1,42 @@
+name: readarr
+description: "A book, magazine, and comic collection manager for Usenet and BitTorrent users."
+image: linuxserver/readarr:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions. See https://docs.linuxserver.io/general/understanding-puid-and-pgid"
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/opt/readarr/config"
+    description: "Host path for Readarr configuration, database, and metadata."
+  - name: BOOKS_PATH
+    label: "Books Path"
+    type: path
+    default: "/data/books"
+    description: "Host path where your book files are stored and managed by Readarr."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/data/downloads"
+    description: "Host path where your download client places completed downloads for Readarr to process."
+
+ports:
+  - name: "WebUI"
+    host: 8787
+    container: 8787
+    protocol: "tcp"
+    description: "Main web interface for Readarr."

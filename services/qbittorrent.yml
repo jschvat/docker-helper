@@ -1,0 +1,52 @@
+name: qbittorrent
+description: "The qBittorrent project aims to provide an open-source software alternative to µTorrent."
+image: linuxserver/qbittorrent:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions. See https://docs.linuxserver.io/general/understanding-puid-and-pgid"
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: WEBUI_PORT
+    label: "Web UI Port"
+    type: number
+    default: 8080
+    description: "The port for the qBittorrent web interface."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/opt/qbittorrent/config"
+    description: "Host path for qBittorrent configuration files."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/data/downloads"
+    description: "Host path where downloaded files will be stored."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080 # This will be updated by the WEBUI_PORT variable
+    protocol: "tcp"
+    description: "Web interface for qBittorrent."
+  - name: "Torrenting_TCP"
+    host: 6881
+    container: 6881
+    protocol: "tcp"
+    description: "Port for incoming torrent connections."
+  - name: "Torrenting_UDP"
+    host: 6881
+    container: 6881
+    protocol: "udp"
+    description: "Port for incoming torrent connections (UDP)."
