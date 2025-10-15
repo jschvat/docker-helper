@@ -53,9 +53,7 @@ htmlcov/
 .hypothesis/
 
 # Project specific
-proxy-confs/
-services/*.yml
-*.yml
+
 
 # Backup files
 *.bak
