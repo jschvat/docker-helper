@@ -1,1 +1,62 @@
 name: swag
+description: "SWAG (Secure Web Application Gateway) is a full-featured, self-hosted, and automated reverse proxy with SSL for your web applications."
+image: linuxserver/swag:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: URL
+    label: "URL"
+    type: string
+    default: "example.com"
+    description: "The domain name for which to generate SSL certificates."
+  - name: SUBDOMAINS
+    label: "Subdomains"
+    type: string
+    default: "www,mail,ftp"
+    description: "A comma-separated list of subdomains for which to generate SSL certificates."
+  - name: VALIDATION
+    label: "Validation Method"
+    type: string
+    default: "http"
+    description: "The validation method to use for Let's Encrypt (http, dns, or duckdns)."
+  - name: DNSPLUGIN
+    label: "DNS Plugin"
+    type: string
+    default: ""
+    description: "The DNS plugin to use for validation (if using dns validation)."
+  - name: EMAIL
+    label: "Email"
+    type: string
+    default: ""
+    description: "Your email address for Let's Encrypt notifications."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store SWAG's configuration."
+
+ports:
+  - name: "HTTP"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for HTTP traffic."
+  - name: "HTTPS"
+    host: 443
+    container: 443
+    protocol: "tcp"
+    description: "The port for HTTPS traffic."

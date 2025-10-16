@@ -1,1 +1,37 @@
 name: unmanic
+description: "Unmanic is a tool for optimising your file library. It can be used to convert your files into a uniform format, manage file movements, and execute custom commands."
+image: josh5/unmanic:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: LIBRARY_PATH
+    label: "Library Path"
+    type: path
+    default: "/library"
+    description: "The host path to your media library."
+  - name: CACHE_PATH
+    label: "Cache Path"
+    type: path
+    default: "/tmp/unmanic"
+    description: "The host path for temporary transcode files."
+
+ports:
+  - name: "WebUI"
+    host: 8888
+    container: 8888
+    protocol: "tcp"
+    description: "The port for the Unmanic web interface."

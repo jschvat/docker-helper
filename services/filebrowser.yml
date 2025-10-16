@@ -1,1 +1,37 @@
 name: filebrowser
+description: "filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files."
+image: filebrowser/filebrowser:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: FB_ROOT
+    label: "Root Path"
+    type: path
+    default: "/srv"
+    description: "The root directory that filebrowser will manage."
+  - name: FB_DATABASE
+    label: "Database Path"
+    type: path
+    default: "/database/filebrowser.db"
+    description: "The path to the filebrowser database file."
+  - name: FB_CONFIG
+    label: "Config Path"
+    type: path
+    default: "/config/settings.json"
+    description: "The path to the filebrowser settings file."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port for the filebrowser Web UI."

@@ -1,1 +1,17 @@
 name: dashy
+description: "Dashy is a highly customizable, easy to use, and privacy-respecting dashboard for your self-hosted services."
+image: lissy93/dashy:latest
+
+variables:
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/app/user-data/conf.yml"
+    description: "The host path to your Dashy conf.yml file."
+
+ports:
+  - name: "Web"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port to access the Dashy web interface."

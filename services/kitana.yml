@@ -1,1 +1,19 @@
 name: kitana
+description: "Kitana is a responsive web frontend for managing your Plex plugins."
+image: pannal/kitana:latest
+
+variables:
+  - name: KITANA_DATA_PATH
+    label: "Kitana Data Path"
+    type: path
+    default: "/app/data"
+    description: "The host path to store Kitana's data."
+
+ports:
+  - name: "WebUI"
+    host: 31337
+    container: 31337
+    protocol: "tcp"
+    description: "The port for the Kitana web interface."
+
+# Note: After starting the container, you will need to access the web UI and authenticate with your Plex account.

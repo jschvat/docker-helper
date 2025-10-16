@@ -1,1 +1,61 @@
 name: tandoor
+description: "Tandoor Recipes is a self-hosted recipe manager that allows you to manage your recipe collection, plan meals, and create shopping lists."
+image: vabene1111/recipes:latest
+
+variables:
+  - name: SECRET_KEY
+    label: "Secret Key"
+    type: string
+    default: "changeme"
+    description: "A secret key for your Tandoor instance. Generate a random one. CHANGE THIS."
+  - name: DB_ENGINE
+    label: "Database Engine"
+    type: string
+    default: "django.db.backends.postgresql"
+    description: "The database engine to use."
+  - name: POSTGRES_HOST
+    label: "PostgreSQL Host"
+    type: string
+    default: "tandoor_db"
+    description: "The hostname of the PostgreSQL server."
+  - name: POSTGRES_PORT
+    label: "PostgreSQL Port"
+    type: number
+    default: 5432
+    description: "The port of the PostgreSQL server."
+  - name: POSTGRES_USER
+    label: "PostgreSQL User"
+    type: string
+    default: "djangodb"
+    description: "The username for the PostgreSQL connection."
+  - name: POSTGRES_PASSWORD
+    label: "PostgreSQL Password"
+    type: string
+    default: "changeme"
+    description: "The password for the PostgreSQL connection. CHANGE THIS."
+  - name: POSTGRES_DB
+    label: "PostgreSQL Database"
+    type: string
+    default: "djangodb"
+    description: "The name of the database to use."
+  - name: STATICFILES_PATH
+    label: "Static Files Path"
+    type: path
+    default: "/opt/recipes/staticfiles"
+    description: "The host path to store Tandoor's static files."
+  - name: MEDIAFILES_PATH
+    label: "Media Files Path"
+    type: path
+    default: "/opt/recipes/mediafiles"
+    description: "The host path to store Tandoor's media files."
+
+ports:
+  - name: "WebUI"
+    host: 80
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the Tandoor web interface."
+
+# Note: Tandoor Recipes requires a PostgreSQL database.
+# You will need to set up a separate database service (e.g., postgresql)
+# and configure the variables accordingly.

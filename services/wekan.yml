@@ -1,1 +1,31 @@
 name: wekan
+description: "Wekan is an open-source and collaborative Trello-like kanban board application."
+image: wekanteam/wekan:latest
+
+variables:
+  - name: ROOT_URL
+    label: "Root URL"
+    type: string
+    default: "http://localhost"
+    description: "The root URL of your Wekan instance."
+  - name: MONGO_URL
+    label: "MongoDB URL"
+    type: string
+    default: "mongodb://wekan_db:27017/wekan"
+    description: "The connection string for the MongoDB database."
+  - name: WITH_API
+    label: "Enable API"
+    type: boolean
+    default: true
+    description: "Enable the Wekan API."
+
+ports:
+  - name: "WebUI"
+    host: 80
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the Wekan web interface."
+
+# Note: Wekan requires a MongoDB database.
+# You will need to set up a separate database service (e.g., mongodb)
+# and configure the MONGO_URL variable accordingly.

@@ -1,1 +1,19 @@
 name: veeam
+description: "Veeam Agent for Linux is a backup and recovery solution for Linux systems."
+image: pk1057/veeam-ubuntu:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/"
+    description: "The host path to the data you want to back up."
+  - name: BACKUP_PATH
+    label: "Backup Path"
+    type: path
+    default: "/backup"
+    description: "The host path where the backups will be stored."
+
+# This service does not expose any ports.
+# It is a command-line tool that you can run to perform backups.
+# You will need to configure the Veeam agent after the first run.

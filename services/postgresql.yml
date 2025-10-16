@@ -1,1 +1,32 @@
 name: postgresql
+description: "PostgreSQL is a powerful, open source object-relational database system."
+image: postgres:latest
+
+variables:
+  - name: POSTGRES_USER
+    label: "User"
+    type: string
+    default: "postgres"
+    description: "The username for the PostgreSQL server."
+  - name: POSTGRES_PASSWORD
+    label: "Password"
+    type: string
+    default: "changeme"
+    description: "The password for the PostgreSQL server. CHANGE THIS."
+  - name: POSTGRES_DB
+    label: "Database Name"
+    type: string
+    default: "postgres"
+    description: "The name of the default database to create."
+  - name: PGDATA
+    label: "Data Path"
+    type: path
+    default: "/var/lib/postgresql/data"
+    description: "The host path to store PostgreSQL's data."
+
+ports:
+  - name: "Database"
+    host: 5432
+    container: 5432
+    protocol: "tcp"
+    description: "The port for connecting to the PostgreSQL server."

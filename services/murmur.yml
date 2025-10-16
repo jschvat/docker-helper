@@ -1,1 +1,30 @@
 name: murmur
+description: "Murmur is the server component of Mumble, a low-latency, high-quality voice chat software."
+image: mumblevoip/mumble-server:latest
+
+variables:
+  - name: MUMBLE_SUPERUSER_PASSWORD
+    label: "SuperUser Password"
+    type: string
+    default: "changeme"
+    description: "The password for the SuperUser account. CHANGE THIS."
+  - name: MUMBLE_DATA_PATH
+    label: "Mumble Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store Murmur's data, including the database and logs."
+
+ports:
+  - name: "Mumble"
+    host: 64738
+    container: 64738
+    protocol: "tcp"
+    description: "The port for Mumble clients to connect to."
+  - name: "Mumble-UDP"
+    host: 64738
+    container: 64738
+    protocol: "udp"
+    description: "The port for Mumble clients to connect to (UDP)."
+
+# Note: You can set other Murmur configuration options by using environment variables prefixed with `MUMBLE_CONFIG_`.
+# For example, to set the welcome text, use `MUMBLE_CONFIG_welcometext="Welcome to my server!"`.

@@ -1,1 +1,29 @@
 name: recyclarr
+description: "Recyclarr is a command-line application that automatically synchronizes recommended settings from the TRaSH guides to your Sonarr and Radarr instances."
+image: recyclarr/recyclarr:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to your recyclarr.yml file."
+
+# This service does not expose any ports.
+# It runs in the background and syncs settings to Sonarr and Radarr.
+# You need to create a recyclarr.yml file in your CONFIG_PATH.

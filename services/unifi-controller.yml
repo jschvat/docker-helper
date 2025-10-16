@@ -1,1 +1,47 @@
 name: unifi-controller
+description: "The UniFi Network Controller is a free software management platform for Ubiquiti's UniFi hardware."
+image: linuxserver/unifi-controller:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for UniFi Controller configuration files."
+
+ports:
+  - name: "WebUI"
+    host: 8443
+    container: 8443
+    protocol: "tcp"
+    description: "The port for the UniFi Controller web interface."
+  - name: "Controller"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for device communication."
+  - name: "STUN"
+    host: 3478
+    container: 3478
+    protocol: "udp"
+    description: "The port for STUN."
+  - name: "Discovery"
+    host: 10001
+    container: 10001
+    protocol: "udp"
+    description: "The port for device discovery."

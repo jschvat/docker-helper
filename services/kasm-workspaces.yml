@@ -1,1 +1,14 @@
 name: kasm-workspaces
+description: "Kasm Workspaces is a container streaming platform that provides browser-based access to desktops, applications, and web services."
+image: kasmweb/kasm-ce:latest
+
+ports:
+  - name: "WebUI"
+    host: 443
+    container: 443
+    protocol: "tcp"
+    description: "The port for the Kasm Workspaces web interface."
+
+# Note: Kasm Workspaces is a multi-container platform and has a specific installation process.
+# It is highly recommended to follow the official installation guide.
+# https://kasmweb.com/docs/latest/install/single_server_install.html

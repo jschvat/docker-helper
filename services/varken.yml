@@ -1,1 +1,29 @@
 name: varken
+description: "Varken is a standalone command-line utility to aggregate data from the Plex ecosystem into InfluxDB."
+image: boerderij/varken:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to your varken.ini file."
+
+# This service does not expose any ports.
+# It runs in the background and sends data to InfluxDB.
+# You need to create a varken.ini file in your CONFIG_PATH.

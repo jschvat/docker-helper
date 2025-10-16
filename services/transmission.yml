@@ -1,1 +1,62 @@
 name: transmission
+description: "Transmission is a fast, easy, and free BitTorrent client."
+image: linuxserver/transmission:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: USER
+    label: "Username"
+    type: string
+    default: "admin"
+    description: "The username for the Transmission web interface."
+  - name: PASS
+    label: "Password"
+    type: string
+    default: "admin"
+    description: "The password for the Transmission web interface. CHANGE THIS."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for Transmission configuration files."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/downloads"
+    description: "Host path where downloaded files will be stored."
+  - name: WATCH_PATH
+    label: "Watch Path"
+    type: path
+    default: "/watch"
+    description: "Host path for .torrent files to be automatically added to Transmission."
+
+ports:
+  - name: "WebUI"
+    host: 9091
+    container: 9091
+    protocol: "tcp"
+    description: "The port for the Transmission web interface."
+  - name: "Torrenting"
+    host: 51413
+    container: 51413
+    protocol: "tcp"
+    description: "The port for incoming torrent connections."
+  - name: "Torrenting_UDP"
+    host: 51413
+    container: 51413
+    protocol: "udp"
+    description: "The port for incoming torrent connections (UDP)."

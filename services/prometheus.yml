@@ -1,1 +1,25 @@
 name: prometheus
+description: "Prometheus is an open-source systems monitoring and alerting toolkit."
+image: prom/prometheus:latest
+
+variables:
+  - name: PROMETHEUS_CONFIG_PATH
+    label: "Prometheus Config Path"
+    type: path
+    default: "/etc/prometheus/prometheus.yml"
+    description: "The host path to your prometheus.yml file."
+  - name: PROMETHEUS_DATA_PATH
+    label: "Prometheus Data Path"
+    type: path
+    default: "/prometheus"
+    description: "The host path to store Prometheus's data."
+
+ports:
+  - name: "WebUI"
+    host: 9090
+    container: 9090
+    protocol: "tcp"
+    description: "The port for the Prometheus web interface."
+
+# Note: You need to create a prometheus.yml file and mount it to the path specified in PROMETHEUS_CONFIG_PATH.
+# This file contains your scrape configurations.

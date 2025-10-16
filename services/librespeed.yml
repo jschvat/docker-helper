@@ -1,1 +1,32 @@
 name: librespeed
+description: "LibreSpeed is a free and open source speedtest, written in Javascript, using XMLHttpRequest and Web Workers."
+image: linuxserver/librespeed:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: PASSWORD
+    label: "Password"
+    type: string
+    default: ""
+    description: "A password to protect the results/stats page."
+
+ports:
+  - name: "WebUI"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the LibreSpeed web interface."

@@ -1,1 +1,43 @@
 name: plexanisync
+description: "PlexAniSync is a tool that synchronizes your Plex anime library with AniList."
+image: rickdb/plexanisync:latest
+
+variables:
+  - name: PLEX_URL
+    label: "Plex URL"
+    type: string
+    default: "http://plex:32400"
+    description: "The URL of your Plex server."
+  - name: PLEX_TOKEN
+    label: "Plex Token"
+    type: string
+    default: ""
+    description: "Your Plex authentication token."
+  - name: PLEX_SECTION
+    label: "Plex Section"
+    type: string
+    default: "Anime"
+    description: "The name of your anime library in Plex."
+  - name: ANI_USERNAME
+    label: "AniList Username"
+    type: string
+    default: ""
+    description: "Your AniList.co username."
+  - name: ANI_TOKEN
+    label: "AniList Token"
+    type: string
+    default: ""
+    description: "Your AniList.co access token."
+  - name: INTERVAL
+    label: "Sync Interval (seconds)"
+    type: number
+    default: 3600
+    description: "The time in seconds between syncs."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/plexanisync"
+    description: "The host path to store custom mappings."
+
+# This service does not expose any ports.
+# It runs in the background and syncs your Plex library with AniList.

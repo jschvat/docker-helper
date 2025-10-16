@@ -1,1 +1,46 @@
 name: matomo
+description: "Matomo is a free and open source web analytics application that tracks online visits to one or more websites and displays reports on these visits for analysis."
+image: matomo:latest
+
+variables:
+  - name: MATOMO_DATABASE_HOST
+    label: "Database Host"
+    type: string
+    default: "matomo_db"
+    description: "The hostname of the database server."
+  - name: MATOMO_DATABASE_ADAPTER
+    label: "Database Adapter"
+    type: string
+    default: "mysql"
+    description: "The type of database to use (mysql or pgsql)."
+  - name: MATOMO_DATABASE_TABLES_PREFIX
+    label: "Table Prefix"
+    type: string
+    default: "matomo_"
+    description: "The prefix for the Matomo tables in the database."
+  - name: MATOMO_DATABASE_USERNAME
+    label: "Database User"
+    type: string
+    default: "matomo"
+    description: "The username for the database connection."
+  - name: MATOMO_DATABASE_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: MATOMO_DATABASE_DBNAME
+    label: "Database Name"
+    type: string
+    default: "matomo"
+    description: "The name of the database to use."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port to access the Matomo web interface."
+
+# Note: Matomo requires a MySQL or MariaDB database.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the MATOMO_DATABASE_* variables accordingly.

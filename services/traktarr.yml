@@ -1,1 +1,29 @@
 name: traktarr
+description: "Traktarr is a script that syncs your Trakt lists with Sonarr and Radarr."
+image: eafxx/traktarr:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Traktarr's configuration file."
+
+# This service does not expose any ports.
+# It runs in the background and syncs your Trakt lists with Sonarr and Radarr.
+# You need to edit the config.json file in your CONFIG_PATH after the first run.

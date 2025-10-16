@@ -1,1 +1,72 @@
 name: speedtest-tracker
+description: "A self-hosted speedtest tracker that runs speed tests periodically and graphs the results."
+image: linuxserver/speedtest-tracker:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: OOKLA_EULA_GDPR
+    label: "Ookla EULA/GDPR"
+    type: boolean
+    default: false
+    description: "Set to true to accept the Ookla EULA and GDPR."
+  - name: DB_CONNECTION
+    label: "Database Connection"
+    type: string
+    default: "sqlite"
+    description: "The database connection to use (sqlite, mysql, pgsql)."
+  - name: DB_HOST
+    label: "Database Host"
+    type: string
+    default: ""
+    description: "The hostname of the database server (if not using sqlite)."
+  - name: DB_PORT
+    label: "Database Port"
+    type: number
+    default: 3306
+    description: "The port of the database server (if not using sqlite)."
+  - name: DB_DATABASE
+    label: "Database Name"
+    type: string
+    default: "speedtest"
+    description: "The name of the database to use (if not using sqlite)."
+  - name: DB_USERNAME
+    label: "Database User"
+    type: string
+    default: "speedtest"
+    description: "The username for the database connection (if not using sqlite)."
+  - name: DB_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection (if not using sqlite)."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store the speedtest-tracker's configuration."
+
+ports:
+  - name: "WebUI"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the speedtest-tracker web interface."
+  - name: "WebUI-HTTPS"
+    host: 443
+    container: 443
+    protocol: "tcp"
+    description: "The port for the speedtest-tracker web interface (HTTPS)."

@@ -1,1 +1,32 @@
 name: dokuwiki
+description: "DokuWiki is a simple to use and highly versatile Open Source wiki software that doesn't require a database."
+image: lscr.io/linuxserver/dokuwiki:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store DokuWiki's configuration and data."
+
+ports:
+  - name: "Web"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port to access the DokuWiki web interface."

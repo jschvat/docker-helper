@@ -1,1 +1,18 @@
 name: telegraf
+description: "Telegraf is a plugin-driven server agent for collecting and reporting metrics."
+image: telegraf:latest
+
+variables:
+  - name: TELEGRAF_CONFIG_PATH
+    label: "Telegraf Config Path"
+    type: path
+    default: "/etc/telegraf/telegraf.conf"
+    description: "The host path to your telegraf.conf file."
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host (for Docker monitoring)."
+
+# This service does not expose any ports by default.
+# It collects metrics and sends them to a specified output (e.g., InfluxDB).

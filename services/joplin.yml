@@ -1,1 +1,57 @@
 name: joplin
+description: "Joplin is a free, open source note taking and to-do application, which can handle a large number of notes organised into notebooks."
+image: joplin/server:latest
+
+variables:
+  - name: APP_BASE_URL
+    label: "App Base URL"
+    type: string
+    default: "http://localhost:22300"
+    description: "The full URL where your Joplin Server will be accessible."
+  - name: APP_PORT
+    label: "App Port"
+    type: number
+    default: 22300
+    description: "The port that Joplin Server will listen on."
+  - name: DB_CLIENT
+    label: "Database Client"
+    type: string
+    default: "pg"
+    description: "The type of database to use (pg for PostgreSQL)."
+  - name: POSTGRES_HOST
+    label: "PostgreSQL Host"
+    type: string
+    default: "joplin_db"
+    description: "The hostname of the PostgreSQL server."
+  - name: POSTGRES_PORT
+    label: "PostgreSQL Port"
+    type: number
+    default: 5432
+    description: "The port of the PostgreSQL server."
+  - name: POSTGRES_USER
+    label: "PostgreSQL User"
+    type: string
+    default: "joplin"
+    description: "The username for the PostgreSQL connection."
+  - name: POSTGRES_PASSWORD
+    label: "PostgreSQL Password"
+    type: string
+    default: "changeme"
+    description: "The password for the PostgreSQL connection. CHANGE THIS."
+  - name: POSTGRES_DATABASE
+    label: "PostgreSQL Database"
+    type: string
+    default: "joplin"
+    description: "The name of the database to use."
+
+ports:
+  - name: "Web"
+    host: 22300
+    container: 22300
+    protocol: "tcp"
+    description: "The port to access the Joplin Server."
+
+# Note: Joplin Server requires a PostgreSQL database.
+# You will need to set up a separate database service (e.g., postgresql)
+# and configure the POSTGRES_* variables accordingly.
+# The default admin credentials are admin@localhost with password admin.

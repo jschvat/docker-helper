@@ -1,1 +1,57 @@
 name: ubooquity
+description: "Ubooquity is a free, lightweight and easy-to-use home server for your comics and ebooks."
+image: linuxserver/ubooquity:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: MAXMEM
+    label: "Max Memory (MB)"
+    type: number
+    default: 512
+    description: "The maximum memory to allocate to Ubooquity."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for Ubooquity configuration files."
+  - name: BOOKS_PATH
+    label: "Books Path"
+    type: path
+    default: "/books"
+    description: "Host path to your book library."
+  - name: COMICS_PATH
+    label: "Comics Path"
+    type: path
+    default: "/comics"
+    description: "Host path to your comic library."
+  - name: FILES_PATH
+    label: "Files Path"
+    type: path
+    default: "/files"
+    description: "Host path for other files."
+
+ports:
+  - name: "WebUI"
+    host: 2202
+    container: 2202
+    protocol: "tcp"
+    description: "The port for the Ubooquity web interface."
+  - name: "Admin"
+    host: 2203
+    container: 2203
+    protocol: "tcp"
+    description: "The port for the Ubooquity admin interface."

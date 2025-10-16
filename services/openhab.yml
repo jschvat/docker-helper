@@ -1,1 +1,69 @@
 name: openhab
+description: "openHAB is a free and open-source home automation software that allows you to control and automate a wide range of smart devices."
+image: openhab/openhab:latest
+
+variables:
+  - name: OPENHAB_HTTP_PORT
+    label: "HTTP Port"
+    type: number
+    default: 8080
+    description: "The port for the openHAB web interface."
+  - name: OPENHAB_HTTPS_PORT
+    label: "HTTPS Port"
+    type: number
+    default: 8443
+    description: "The port for the openHAB web interface (HTTPS)."
+  - name: EXTRA_JAVA_OPTS
+    label: "Extra Java Options"
+    type: string
+    default: ""
+    description: "Additional Java options to pass to the openHAB runtime."
+  - name: USER_ID
+    label: "User ID"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: GROUP_ID
+    label: "Group ID"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONF_PATH
+    label: "Config Path"
+    type: path
+    default: "/openhab/conf"
+    description: "The host path to store openHAB's configuration files."
+  - name: USERDATA_PATH
+    label: "User Data Path"
+    type: path
+    default: "/openhab/userdata"
+    description: "The host path to store openHAB's user data."
+  - name: ADDONS_PATH
+    label: "Addons Path"
+    type: path
+    default: "/openhab/addons"
+    description: "The host path to store openHAB's addons."
+
+ports:
+  - name: "HTTP"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "openHAB web interface."
+  - name: "HTTPS"
+    host: 8443
+    container: 8443
+    protocol: "tcp"
+    description: "openHAB web interface (HTTPS)."
+  - name: "LSP"
+    host: 5007
+    container: 5007
+    protocol: "tcp"
+    description: "openHAB Language Server Protocol."
+
+# Note: openHAB may require additional ports depending on the bindings you use.

@@ -1,1 +1,23 @@
 name: watchtower
+description: "Watchtower is a process for automating Docker container base image updates."
+image: containrrr/watchtower:latest
+
+variables:
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host."
+  - name: WATCHTOWER_SCHEDULE
+    label: "Schedule"
+    type: string
+    default: "0 0 4 * * *"
+    description: "A cron expression for how often to check for updates."
+  - name: WATCHTOWER_CLEANUP
+    label: "Cleanup"
+    type: boolean
+    default: true
+    description: "Remove old images after updating."
+
+# This service does not expose any ports.
+# It runs in the background and monitors your running containers.

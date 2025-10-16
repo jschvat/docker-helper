@@ -1,1 +1,46 @@
 name: sonarqube
+description: "SonarQube is an open-source platform for continuous inspection of code quality."
+image: sonarqube:latest
+
+variables:
+  - name: SONARQUBE_JDBC_USERNAME
+    label: "JDBC Username"
+    type: string
+    default: "sonar"
+    description: "The username for the SonarQube database."
+  - name: SONARQUBE_JDBC_PASSWORD
+    label: "JDBC Password"
+    type: string
+    default: "sonar"
+    description: "The password for the SonarQube database. CHANGE THIS."
+  - name: SONARQUBE_JDBC_URL
+    label: "JDBC URL"
+    type: string
+    default: "jdbc:postgresql://sonarqube_db:5432/sonar"
+    description: "The JDBC URL for the SonarQube database."
+  - name: SONARQUBE_EXTENSIONS_PATH
+    label: "Extensions Path"
+    type: path
+    default: "/opt/sonarqube/extensions"
+    description: "The host path to store SonarQube's extensions."
+  - name: SONARQUBE_LOGS_PATH
+    label: "Logs Path"
+    type: path
+    default: "/opt/sonarqube/logs"
+    description: "The host path to store SonarQube's logs."
+  - name: SONARQUBE_DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/opt/sonarqube/data"
+    description: "The host path to store SonarQube's data."
+
+ports:
+  - name: "WebUI"
+    host: 9000
+    container: 9000
+    protocol: "tcp"
+    description: "The port for the SonarQube web interface."
+
+# Note: SonarQube requires a PostgreSQL database.
+# You will need to set up a separate database service (e.g., postgresql)
+# and configure the SONARQUBE_JDBC_* variables accordingly.

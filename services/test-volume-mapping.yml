@@ -1,0 +1,25 @@
+name: test-volume-mapping
+description: "Test service for volume mapping feature"
+image: nginx:alpine
+
+variables:
+  - name: DATA_DIR
+    label: "Data Directory"
+    type: directory
+    default: "/tmp/test-data"
+    container_path: "/usr/share/nginx/html"
+    description: "Directory to map as web content"
+
+  - name: CONFIG_DIR
+    label: "Config Directory"
+    type: directory
+    default: "/tmp/test-config"
+    container_path: "/etc/nginx"
+    description: "Directory for nginx configuration"
+
+ports:
+  - name: HTTP
+    host: 8090
+    container: 80
+    protocol: tcp
+    description: "HTTP port"

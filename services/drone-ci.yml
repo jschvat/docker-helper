@@ -1,1 +1,56 @@
 name: drone-ci
+description: "Drone is a self-service Continuous Integration platform for busy development teams."
+image: drone/drone:latest
+
+variables:
+  - name: DRONE_SERVER_HOST
+    label: "Server Host"
+    type: string
+    default: "drone.yourdomain.com"
+    description: "The public hostname of your Drone server."
+  - name: DRONE_SERVER_PROTO
+    label: "Server Protocol"
+    type: string
+    default: "https"
+    description: "The protocol for your Drone server (http or https)."
+  - name: DRONE_RPC_SECRET
+    label: "RPC Secret"
+    type: string
+    default: "changeme"
+    description: "A shared secret used to authenticate communication between the server and runners. CHANGE THIS."
+  - name: DRONE_GITHUB_CLIENT_ID
+    label: "GitHub Client ID"
+    type: string
+    default: ""
+    description: "The Client ID from your GitHub OAuth application."
+  - name: DRONE_GITHUB_CLIENT_SECRET
+    label: "GitHub Client Secret"
+    type: string
+    default: ""
+    description: "The Client Secret from your GitHub OAuth application."
+  - name: DRONE_USER_CREATE
+    label: "Admin User"
+    type: string
+    default: "username:your_admin_username,admin:true"
+    description: "Create an admin user on the first run. Replace 'your_admin_username' with your GitHub username."
+  - name: DRONE_DATABASE_DRIVER
+    label: "Database Driver"
+    type: string
+    default: "sqlite3"
+    description: "The database driver to use (sqlite3, postgres, mysql)."
+  - name: DRONE_DATABASE_DATASOURCE
+    label: "Database Datasource"
+    type: string
+    default: "/data/database.sqlite"
+    description: "The connection string for the database."
+
+ports:
+  - name: "Web"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Drone web interface."
+
+# Note: This service is for the Drone server only.
+# You will need to set up a separate Drone runner to execute builds.
+# You will also need to create a GitHub OAuth application to get your Client ID and Secret.

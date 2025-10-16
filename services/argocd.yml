@@ -1,1 +1,7 @@
 name: argocd
+description: "Argo CD is a declarative, GitOps continuous delivery tool for Kubernetes. It is not typically run as a standalone Docker container, but rather deployed to a Kubernetes cluster."
+image: argoproj/argocd:latest
+# Argo CD is designed for Kubernetes. The image is provided for reference,
+# but a full deployment requires a Kubernetes environment.
+# See the official documentation for installation instructions:
+# https://argo-cd.readthedocs.io/en/stable/

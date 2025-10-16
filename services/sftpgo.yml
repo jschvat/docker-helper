@@ -1,1 +1,37 @@
 name: sftpgo
+description: "SFTPGo is a free, open-source, and fully-featured SFTP server with optional FTP/S and WebDAV support."
+image: drakkan/sftpgo:latest
+
+variables:
+  - name: SFTPGO_DATA_PATH
+    label: "SFTPGo Data Path"
+    type: path
+    default: "/srv/sftpgo"
+    description: "The host path to store SFTPGo's data."
+  - name: SFTPGO_CONFIG_PATH
+    label: "SFTPGo Config Path"
+    type: path
+    default: "/etc/sftpgo"
+    description: "The host path to store SFTPGo's configuration."
+
+ports:
+  - name: "SFTP"
+    host: 2022
+    container: 2022
+    protocol: "tcp"
+    description: "The port for SFTP connections."
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the SFTPGo web interface."
+  - name: "FTP"
+    host: 2121
+    container: 2121
+    protocol: "tcp"
+    description: "The port for FTP connections (optional)."
+  - name: "WebDAV"
+    host: 8081
+    container: 8081
+    protocol: "tcp"
+    description: "The port for WebDAV connections (optional)."

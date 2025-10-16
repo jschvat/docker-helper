@@ -1,1 +1,25 @@
 name: jenkins
+description: "Jenkins is a self-contained, open source automation server which can be used to automate all sorts of tasks related to building, testing, and delivering or deploying software."
+image: jenkins/jenkins:lts
+
+variables:
+  - name: JENKINS_HOME
+    label: "Jenkins Home"
+    type: path
+    default: "/var/jenkins_home"
+    description: "The host path to store Jenkins' configuration and data."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the Jenkins web interface."
+  - name: "Agents"
+    host: 50000
+    container: 50000
+    protocol: "tcp"
+    description: "The port for Jenkins agents to connect to the master."
+
+# Note: After the first run, you will need to get the initial admin password from the container logs.
+# You can do this by running `docker logs <container_name>`.

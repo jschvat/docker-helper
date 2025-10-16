@@ -39,7 +39,7 @@ def get_installed_services(client):
 def install_service(service_config, config_values):
     try:
         command = ["docker", "run", "-d"]
-        
+
         service_name = service_config.get('name', 'default-service-name')
         command.extend(["--name", service_name])
 
@@ -51,7 +51,23 @@ def install_service(service_config, config_values):
             if user_value is None:
                 continue
 
-            if var.get('type') == 'path':
+            var_type = var.get('type', 'string')
+
+            # Check if this is a path/directory with volume mapping enabled
+            if var_type in ['path', 'directory']:
+                # Check if volume mapping is enabled for this variable
+                volume_mappings = config_values.get('volume_mappings', {})
+                if var_name in volume_mappings and volume_mappings[var_name]['enabled']:
+                    # Use volume mapping
+                    host_path = volume_mappings[var_name]['host_path']
+                    container_path = volume_mappings[var_name]['container_path']
+                    if host_path and container_path:
+                        command.extend(["-v", f"{host_path}:{container_path}"])
+                else:
+                    # Set as environment variable if no volume mapping
+                    command.extend(["-e", f"{var_name}={user_value}"])
+            elif var_type == 'path':
+                # Old behavior for backward compatibility
                 container_path = var.get('default', '') # The YAML default is the container path
                 command.extend(["-v", f"{user_value}:{container_path}"])
             else:

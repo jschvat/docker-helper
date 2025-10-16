@@ -1,1 +1,6 @@
 name: ubuntu
+description: "A base image for running Ubuntu."
+image: ubuntu:latest
+
+# This is a base image, so no default variables or ports are defined.
+# You can add them here if your specific use case requires them.

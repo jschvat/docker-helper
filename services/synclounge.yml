@@ -1,1 +1,32 @@
 name: synclounge
+description: "SyncLounge is a third-party tool that allows you to watch Plex content with your friends."
+image: linuxserver/synclounge:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: AUTH_LIST
+    label: "Auth List"
+    type: string
+    default: ""
+    description: "A comma-separated list of Plex usernames to allow access."
+
+ports:
+  - name: "WebUI"
+    host: 8088
+    container: 8088
+    protocol: "tcp"
+    description: "The port for the SyncLounge web interface."

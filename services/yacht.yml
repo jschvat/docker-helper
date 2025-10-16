@@ -1,1 +1,22 @@
 name: yacht
+description: "Yacht is a web-based, self-hosted Docker container management tool."
+image: selfhostedpro/yacht:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Yacht's data."
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host."
+
+ports:
+  - name: "WebUI"
+    host: 8000
+    container: 8000
+    protocol: "tcp"
+    description: "The port for the Yacht web interface."

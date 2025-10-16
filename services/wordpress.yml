@@ -1,1 +1,41 @@
 name: wordpress
+description: "WordPress is a free and open-source content management system written in PHP and paired with a MySQL or MariaDB database."
+image: wordpress:latest
+
+variables:
+  - name: WORDPRESS_DB_HOST
+    label: "Database Host"
+    type: string
+    default: "wordpress_db"
+    description: "The hostname of the database server."
+  - name: WORDPRESS_DB_USER
+    label: "Database User"
+    type: string
+    default: "wordpress"
+    description: "The username for the database connection."
+  - name: WORDPRESS_DB_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: WORDPRESS_DB_NAME
+    label: "Database Name"
+    type: string
+    default: "wordpress"
+    description: "The name of the database to use."
+  - name: WORDPRESS_DATA_PATH
+    label: "WordPress Data Path"
+    type: path
+    default: "/var/www/html"
+    description: "The host path to store WordPress's data."
+
+ports:
+  - name: "Web"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the WordPress web server."
+
+# Note: WordPress requires a MySQL or MariaDB database.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the WORDPRESS_DB_* variables accordingly.

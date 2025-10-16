@@ -1,1 +1,61 @@
 name: owncloud
+description: "ownCloud is a suite of client-server software for creating and using file hosting services."
+image: owncloud/server:latest
+
+variables:
+  - name: OWNCLOUD_DOMAIN
+    label: "Domain"
+    type: string
+    default: "localhost"
+    description: "The domain name of your ownCloud instance."
+  - name: OWNCLOUD_DB_TYPE
+    label: "Database Type"
+    type: string
+    default: "mysql"
+    description: "The type of database to use (e.g., mysql, pgsql, sqlite)."
+  - name: OWNCLOUD_DB_HOST
+    label: "Database Host"
+    type: string
+    default: "owncloud_db"
+    description: "The hostname of the database server."
+  - name: OWNCLOUD_DB_NAME
+    label: "Database Name"
+    type: string
+    default: "owncloud"
+    description: "The name of the ownCloud database."
+  - name: OWNCLOUD_DB_USER
+    label: "Database User"
+    type: string
+    default: "owncloud"
+    description: "The username for the database connection."
+  - name: OWNCLOUD_DB_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: OWNCLOUD_ADMIN_USERNAME
+    label: "Admin Username"
+    type: string
+    default: "admin"
+    description: "The username for the ownCloud admin account."
+  - name: OWNCLOUD_ADMIN_PASSWORD
+    label: "Admin Password"
+    type: string
+    default: "admin"
+    description: "The password for the ownCloud admin account. CHANGE THIS."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/mnt/data"
+    description: "The host path to store ownCloud's data."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the ownCloud web interface."
+
+# Note: ownCloud requires a MySQL/MariaDB or PostgreSQL database for production use.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the OWNCLOUD_DB_* variables accordingly.

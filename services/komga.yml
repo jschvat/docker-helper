@@ -1,1 +1,22 @@
 name: komga
+description: "Komga is a free and open source comics/mangas server."
+image: gotson/komga:latest
+
+variables:
+  - name: KOMGA_CONFIG_PATH
+    label: "Komga Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Komga's configuration and database."
+  - name: KOMGA_MEDIA_PATH
+    label: "Komga Media Path"
+    type: path
+    default: "/data"
+    description: "The host path to your comics/mangas library."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the Komga web interface."

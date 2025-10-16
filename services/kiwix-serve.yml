@@ -1,1 +1,20 @@
 name: kiwix-serve
+description: "Kiwix-serve is a ZIM file server. It allows you to browse offline copies of websites like Wikipedia, Project Gutenberg, and more."
+image: ghcr.io/kiwix/kiwix-serve:latest
+
+variables:
+  - name: ZIM_FILES_PATH
+    label: "ZIM Files Path"
+    type: path
+    default: "/data"
+    description: "The host path to the directory containing your ZIM files."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Kiwix-serve web interface."
+
+# Note: You need to download ZIM files and place them in the directory specified by ZIM_FILES_PATH.
+# You can find ZIM files at https://wiki.kiwix.org/wiki/Content_in_all_languages

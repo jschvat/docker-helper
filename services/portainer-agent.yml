@@ -1,1 +1,22 @@
 name: portainer-agent
+description: "The Portainer Agent is a lightweight agent that allows a central Portainer server to manage a remote Docker environment."
+image: portainer/agent:latest
+
+variables:
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host."
+  - name: AGENT_SECRET
+    label: "Agent Secret"
+    type: string
+    default: ""
+    description: "A secret to secure the communication between the agent and the Portainer server."
+
+ports:
+  - name: "Agent"
+    host: 9001
+    container: 9001
+    protocol: "tcp"
+    description: "The port for the Portainer Agent."

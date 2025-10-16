@@ -1,1 +1,14 @@
 name: python
+description: "A base image for running Python applications."
+image: python:latest
+
+variables:
+  - name: APP_PATH
+    label: "Application Path"
+    type: path
+    default: "/usr/src/app"
+    description: "The host path containing your Python application code."
+
+# This is a base image, so no default ports are defined.
+# You can add them here if your specific use case requires them.
+# You will likely need to add a command to run your application.

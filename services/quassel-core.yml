@@ -1,1 +1,37 @@
 name: quassel-core
+description: "Quassel Core is the server component of Quassel, a modern, cross-platform, distributed IRC client."
+image: linuxserver/quassel-core:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: DB_BACKEND
+    label: "Database Backend"
+    type: string
+    default: "SQLite"
+    description: "The database backend to use (SQLite or PostgreSQL)."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for Quassel Core configuration files."
+
+ports:
+  - name: "Quassel"
+    host: 4242
+    container: 4242
+    protocol: "tcp"
+    description: "The port for Quassel clients to connect to."

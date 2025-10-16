@@ -1,1 +1,67 @@
 name: tdarr
+description: "Tdarr is a self-hosted web-app for automating media library management and transcoding."
+image: haveagitgat/tdarr:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: SERVER_IP
+    label: "Server IP"
+    type: string
+    default: "0.0.0.0"
+    description: "The IP address for the Tdarr server to listen on."
+  - name: SERVER_PORT
+    label: "Server Port"
+    type: number
+    default: 8266
+    description: "The port for the Tdarr server."
+  - name: WEBUI_PORT
+    label: "WebUI Port"
+    type: number
+    default: 8265
+    description: "The port for the Tdarr web interface."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/app/server/Tdarr/DB2"
+    description: "The host path to store Tdarr's configuration."
+  - name: LOGS_PATH
+    label: "Logs Path"
+    type: path
+    default: "/app/server/Tdarr/Logs"
+    description: "The host path to store Tdarr's logs."
+  - name: MEDIA_PATH
+    label: "Media Path"
+    type: path
+    default: "/media"
+    description: "The host path to your media library."
+  - name: CACHE_PATH
+    label: "Cache Path"
+    type: path
+    default: "/temp"
+    description: "The host path for temporary transcode files."
+
+ports:
+  - name: "WebUI"
+    host: 8265
+    container: 8265
+    protocol: "tcp"
+    description: "The port for the Tdarr web interface."
+  - name: "Server"
+    host: 8266
+    container: 8266
+    protocol: "tcp"
+    description: "The port for the Tdarr server."

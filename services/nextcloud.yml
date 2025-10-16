@@ -1,1 +1,51 @@
 name: nextcloud
+description: "Nextcloud is a suite of client-server software for creating and using file hosting services."
+image: linuxserver/nextcloud:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: MYSQL_DATABASE
+    label: "Database Name"
+    type: string
+    default: "nextcloud"
+    description: "The name of the Nextcloud database."
+  - name: MYSQL_USER
+    label: "Database User"
+    type: string
+    default: "nextcloud"
+    description: "The username for the database connection."
+  - name: MYSQL_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: MYSQL_HOST
+    label: "Database Host"
+    type: string
+    default: "nextcloud_db"
+    description: "The hostname of the database server."
+
+ports:
+  - name: "WebUI"
+    host: 443
+    container: 443
+    protocol: "tcp"
+    description: "The port for the Nextcloud web interface."
+
+# Note: Nextcloud requires a MySQL/MariaDB or PostgreSQL database.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the MYSQL_* variables accordingly.

@@ -1,1 +1,35 @@
 name: gitea
+description: "Gitea is a community managed lightweight code hosting solution written in Go. It is published under the MIT license."
+image: gitea/gitea:latest
+
+variables:
+  - name: USER_UID
+    label: "User ID (UID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: USER_GID
+    label: "Group ID (GID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: GITEA_DATA_PATH
+    label: "Gitea Data Path"
+    type: path
+    default: "/data/gitea"
+    description: "The host path to store Gitea's data."
+
+ports:
+  - name: "WebUI"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port for the Gitea web interface."
+  - name: "SSH"
+    host: 2222
+    container: 22
+    protocol: "tcp"
+    description: "The port for SSH access to Gitea."
+
+# Note: Gitea can use SQLite, but for production, it is recommended to use a separate database service (e.g., mariadb or postgresql).
+# You can configure the database connection in the Gitea web UI during the initial setup.

@@ -1,1 +1,27 @@
 name: dockge
+description: "Dockge is a fancy, easy-to-use, and reactive self-hosted docker compose.yaml stack-oriented manager."
+image: louislam/dockge:latest
+
+variables:
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host."
+  - name: STACKS_PATH
+    label: "Stacks Path"
+    type: path
+    default: "/opt/stacks"
+    description: "The host path where your docker-compose stacks are stored."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/opt/dockge"
+    description: "The host path to store Dockge's own data."
+
+ports:
+  - name: "Web"
+    host: 5001
+    container: 5001
+    protocol: "tcp"
+    description: "The port to access the Dockge web interface."

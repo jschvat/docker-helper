@@ -1,1 +1,32 @@
 name: rabbitmq
+description: "RabbitMQ is an open-source message-broker software that originally implemented the Advanced Message Queuing Protocol and has since been extended with a plug-in architecture to support Streaming Text Oriented Messaging Protocol, MQ Telemetry Transport, and other protocols."
+image: rabbitmq:management
+
+variables:
+  - name: RABBITMQ_DEFAULT_USER
+    label: "Default User"
+    type: string
+    default: "user"
+    description: "The default username for the RabbitMQ server."
+  - name: RABBITMQ_DEFAULT_PASS
+    label: "Default Password"
+    type: string
+    default: "password"
+    description: "The default password for the RabbitMQ server. CHANGE THIS."
+  - name: RABBITMQ_DATA_PATH
+    label: "RabbitMQ Data Path"
+    type: path
+    default: "/var/lib/rabbitmq"
+    description: "The host path to store RabbitMQ's data."
+
+ports:
+  - name: "AMQP"
+    host: 5672
+    container: 5672
+    protocol: "tcp"
+    description: "The port for AMQP clients to connect to."
+  - name: "WebUI"
+    host: 15672
+    container: 15672
+    protocol: "tcp"
+    description: "The port for the RabbitMQ management web interface."

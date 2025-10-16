@@ -1,1 +1,47 @@
 name: deconz
+description: "deCONZ is a software that runs on a Raspberry Pi or a PC to communicate with a wide range of Zigbee devices like lights, sensors, and switches."
+image: deconzcommunity/deconz:latest
+
+variables:
+  - name: DECONZ_DEVICE
+    label: "deCONZ Device"
+    type: string
+    default: "/dev/ttyUSB0"
+    description: "The path to the Conbee/Raspbee device."
+  - name: DECONZ_WEB_PORT
+    label: "Web Port"
+    type: number
+    default: 8080
+    description: "The port for the deCONZ web interface (Phoscon). Using 8080 to avoid conflicts."
+  - name: DECONZ_WS_PORT
+    label: "Websocket Port"
+    type: number
+    default: 8443
+    description: "The port for the deCONZ websocket connection."
+  - name: DECONZ_VNC_MODE
+    label: "VNC Mode"
+    type: number
+    default: 0
+    description: "Set to 1 to enable VNC access to the deCONZ GUI."
+  - name: DECONZ_VNC_PORT
+    label: "VNC Port"
+    type: number
+    default: 5900
+    description: "The port for VNC access."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080 # Must match DECONZ_WEB_PORT
+    protocol: "tcp"
+    description: "deCONZ web interface (Phoscon)."
+  - name: "Websocket"
+    host: 8443
+    container: 8443 # Must match DECONZ_WS_PORT
+    protocol: "tcp"
+    description: "deCONZ websocket port."
+  - name: "VNC"
+    host: 5900
+    container: 5900 # Must match DECONZ_VNC_PORT
+    protocol: "tcp"
+    description: "VNC access to deCONZ GUI."

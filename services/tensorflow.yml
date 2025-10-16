@@ -1,1 +1,21 @@
 name: tensorflow
+description: "TensorFlow is an end-to-end open source platform for machine learning."
+image: tensorflow/tensorflow:latest
+
+variables:
+  - name: APP_PATH
+    label: "Application Path"
+    type: path
+    default: "/app"
+    description: "The host path containing your TensorFlow application code."
+
+ports:
+  - name: "Jupyter"
+    host: 8888
+    container: 8888
+    protocol: "tcp"
+    description: "The port for the Jupyter Notebook server."
+
+# This image includes Jupyter Notebook.
+# For GPU support, you will need to use a different image tag (e.g., tensorflow/tensorflow:latest-gpu)
+# and have the NVIDIA Container Toolkit installed.

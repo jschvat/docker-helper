@@ -1,1 +1,44 @@
 name: minecraft-server
+description: "A dedicated server for Minecraft Java Edition."
+image: itzg/minecraft-server:latest
+
+variables:
+  - name: EULA
+    label: "Accept EULA"
+    type: boolean
+    default: false
+    description: "You must accept the Minecraft End User License Agreement to run the server. Set to true to accept."
+  - name: TYPE
+    label: "Server Type"
+    type: string
+    default: "VANILLA"
+    description: "The type of server to run (e.g., VANILLA, PAPER, SPIGOT, FORGE)."
+  - name: GAMEMODE
+    label: "Game Mode"
+    type: string
+    default: "survival"
+    description: "The game mode for the server (e.g., survival, creative, adventure)."
+  - name: DIFFICULTY
+    label: "Difficulty"
+    type: string
+    default: "easy"
+    description: "The difficulty for the server (e.g., peaceful, easy, normal, hard)."
+  - name: LEVEL_SEED
+    label: "Level Seed"
+    type: string
+    default: ""
+    description: "(Optional) The seed for generating the world."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store the server's data, including worlds and configuration."
+
+ports:
+  - name: "Game"
+    host: 25565
+    container: 25565
+    protocol: "tcp"
+    description: "The port for Minecraft clients to connect to."
+
+# Note: You must set EULA to true to run the server.

@@ -1,4 +1,5 @@
 name: adguard-home
+description: "AdGuard Home is a network-wide software for blocking ads and tracking. It acts as a DNS server that re-routes tracking domains to a 'black hole', thus preventing your devices from connecting to those servers."
 image: adguard/adguardhome:latest
 
 variables:

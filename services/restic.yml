@@ -1,1 +1,30 @@
 name: restic
+description: "Restic is a modern backup program that can back up your files securely."
+image: restic/restic:latest
+
+variables:
+  - name: RESTIC_REPOSITORY
+    label: "Repository"
+    type: string
+    default: "/backups"
+    description: "The path to the restic repository."
+  - name: RESTIC_PASSWORD
+    label: "Password"
+    type: string
+    default: "changeme"
+    description: "The password for the restic repository. CHANGE THIS."
+  - name: SOURCE_PATH
+    label: "Source Path"
+    type: path
+    default: "/source"
+    description: "The host path of the data you want to back up."
+  - name: BACKUP_PATH
+    label: "Backup Path"
+    type: path
+    default: "/backups"
+    description: "The host path where the restic repository will be stored."
+
+# This service does not expose any ports.
+# It is a command-line tool that you can run to perform backups.
+# Example command to run a backup:
+# docker-compose run --rm restic backup /source

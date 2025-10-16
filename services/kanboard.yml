@@ -1,1 +1,26 @@
 name: kanboard
+description: "Kanboard is a free and open source Kanban project management software."
+image: kanboard/kanboard:latest
+
+variables:
+  - name: KANBOARD_DATA_PATH
+    label: "Kanboard Data Path"
+    type: path
+    default: "/var/www/app/data"
+    description: "The host path to store Kanboard's data."
+  - name: KANBOARD_PLUGINS_PATH
+    label: "Kanboard Plugins Path"
+    type: path
+    default: "/var/www/app/plugins"
+    description: "The host path to store Kanboard's plugins."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Kanboard web interface."
+
+# Note: This configuration uses SQLite for the database.
+# For production, it is recommended to use a separate database service (e.g., mariadb or postgresql).
+# The default admin credentials are admin with password admin.

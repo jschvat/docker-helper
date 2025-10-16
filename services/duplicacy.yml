@@ -1,1 +1,42 @@
 name: duplicacy
+description: "Duplicacy is a modern backup tool that supports cloud storage. This service runs the Duplicacy Web UI."
+image: saspus/duplicacy-web:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Duplicacy's configuration files."
+  - name: CACHE_PATH
+    label: "Cache Path"
+    type: path
+    default: "/cache"
+    description: "The host path for Duplicacy's cache."
+  - name: SOURCE_PATH
+    label: "Source Path"
+    type: path
+    default: "/source"
+    description: "The host path of the data you want to back up."
+
+ports:
+  - name: "WebUI"
+    host: 3875
+    container: 3875
+    protocol: "tcp"
+    description: "The port for the Duplicacy Web UI."

@@ -1,1 +1,37 @@
 name: jdownloader2
+description: "JDownloader 2 is a free, open-source download management tool with a large community of developers that makes downloading as easy and fast as it should be."
+image: jlesage/jdownloader-2:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store JDownloader 2's configuration."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/output"
+    description: "The host path where downloaded files will be stored."
+
+ports:
+  - name: "WebUI"
+    host: 5800
+    container: 5800
+    protocol: "tcp"
+    description: "The port for the JDownloader 2 web interface."

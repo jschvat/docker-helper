@@ -1,1 +1,45 @@
 name: tvheadend
+description: "Tvheadend is a TV streaming server and recorder for Linux, FreeBSD and Android supporting DVB-S, DVB-S2, DVB-C, DVB-T, ATSC, ISDB-T, IPTV, SAT>IP and HDHomeRun as input sources."
+image: linuxserver/tvheadend:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for Tvheadend configuration files."
+  - name: RECORDINGS_PATH
+    label: "Recordings Path"
+    type: path
+    default: "/recordings"
+    description: "Host path where TV recordings will be stored."
+
+ports:
+  - name: "WebUI"
+    host: 9981
+    container: 9981
+    protocol: "tcp"
+    description: "The port for the Tvheadend web interface."
+  - name: "HTSP"
+    host: 9982
+    container: 9982
+    protocol: "tcp"
+    description: "The port for the HTSP protocol (used by Kodi and other clients)."
+
+# Note: You may need to pass DVB devices to the container to use a TV tuner.
+# For example: --device /dev/dvb

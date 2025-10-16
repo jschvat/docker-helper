@@ -1,1 +1,7 @@
 name: speedtest
+description: "A command-line interface for testing internet bandwidth using speedtest.net."
+image: anilpai/speedtest-cli:latest
+
+# This service does not expose any ports and is intended for command-line use.
+# Example command to run a speedtest:
+# docker-compose run --rm speedtest

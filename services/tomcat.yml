@@ -1,1 +1,27 @@
 name: tomcat
+description: "Apache Tomcat is an open source software implementation of the Java Servlet, JavaServer Pages, Java Expression Language and Java WebSocket technologies."
+image: tomcat:latest
+
+variables:
+  - name: TOMCAT_USER
+    label: "Tomcat User"
+    type: string
+    default: "tomcat"
+    description: "The username for the Tomcat manager."
+  - name: TOMCAT_PASSWORD
+    label: "Tomcat Password"
+    type: string
+    default: "changeme"
+    description: "The password for the Tomcat manager. CHANGE THIS."
+  - name: WEBAPPS_PATH
+    label: "Webapps Path"
+    type: path
+    default: "/usr/local/tomcat/webapps"
+    description: "The host path to deploy your web applications."
+
+ports:
+  - name: "Web"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the Tomcat web server."

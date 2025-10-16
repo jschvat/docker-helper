@@ -1,1 +1,29 @@
 name: ollama-with-openwebui
+description: "A combination of Ollama and Open WebUI in a single container. Ollama provides the large language model, and Open WebUI provides a user-friendly web interface."
+image: ghcr.io/open-webui/open-webui:ollama
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/app/backend/data"
+    description: "The host path to store Open WebUI's data."
+  - name: OLLAMA_MODELS_PATH
+    label: "Ollama Models Path"
+    type: path
+    default: "/root/.ollama"
+    description: "The host path to store the Ollama models."
+
+ports:
+  - name: "WebUI"
+    host: 3000
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the Open WebUI."
+  - name: "Ollama API"
+    host: 11434
+    container: 11434
+    protocol: "tcp"
+    description: "The port for the Ollama API."
+
+# Note: For GPU support, you will need to have the NVIDIA Container Toolkit installed and run the container with the --gpus=all flag.

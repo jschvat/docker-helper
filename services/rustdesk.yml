@@ -1,1 +1,34 @@
 name: rustdesk
+description: "RustDesk is a full-featured open source remote control alternative for self-hosting and security with minimal configuration."
+image: rustdesk/rustdesk-server:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store RustDesk server's data."
+
+ports:
+  - name: "HBBS"
+    host: 21115
+    container: 21115
+    protocol: "tcp"
+    description: "RustDesk ID/Rendezvous server."
+  - name: "HBBR"
+    host: 21116
+    container: 21116
+    protocol: "tcp"
+    description: "RustDesk Relay server."
+  - name: "HBBR_UDP"
+    host: 21116
+    container: 21116
+    protocol: "udp"
+    description: "RustDesk Relay server (UDP)."
+  - name: "HBBS_UDP"
+    host: 21118
+    container: 21118
+    protocol: "udp"
+    description: "RustDesk ID/Rendezvous server (UDP)."
+
+# Note: You need to set the -k and -r options on the client to point to your server.

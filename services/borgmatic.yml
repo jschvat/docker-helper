@@ -1,1 +1,36 @@
 name: borgmatic
+description: "Borgmatic is a simple, configuration-driven wrapper for BorgBackup that simplifies the process of creating and managing backups."
+image: ghcr.io/borgmatic-collective/borgmatic:latest
+
+variables:
+  - name: BORG_PASSPHRASE
+    label: "Borg Passphrase"
+    type: string
+    default: "changeme"
+    description: "The passphrase to encrypt the Borg repository. CHANGE THIS to a secure, random string."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/etc/borgmatic.d/"
+    description: "The host path containing your borgmatic configuration files (e.g., config.yaml)."
+  - name: REPO_PATH
+    label: "Repository Path"
+    type: path
+    default: "/mnt/borg-repository"
+    description: "The host path where the Borg repository will be stored."
+  - name: SOURCE_PATH
+    label: "Source Path"
+    type: path
+    default: "/mnt/source"
+    description: "The host path of the data you want to back up."
+
+# Borgmatic does not typically expose any network ports.
+# It is configured via YAML files mounted into the container.
+# You will need to create a config.yaml in your CONFIG_PATH.
+# See the borgmatic documentation for configuration details:
+# https://torsion.org/borgmatic/

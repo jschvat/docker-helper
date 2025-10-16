@@ -1,1 +1,27 @@
 name: grafana
+description: "Grafana is a multi-platform open source analytics and interactive visualization web application. It provides charts, graphs, and alerts for the web when connected to supported data sources."
+image: grafana/grafana:latest
+
+variables:
+  - name: GF_DATA_PATH
+    label: "Grafana Data Path"
+    type: path
+    default: "/var/lib/grafana"
+    description: "The host path to store Grafana's data, including dashboards and data sources."
+  - name: GF_INSTALL_PLUGINS
+    label: "Install Plugins"
+    type: string
+    default: ""
+    description: "A comma-separated list of plugins to install on startup."
+  - name: GF_SECURITY_ADMIN_PASSWORD
+    label: "Admin Password"
+    type: string
+    default: "admin"
+    description: "The password for the admin user."
+
+ports:
+  - name: "WebUI"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port for the Grafana web interface."

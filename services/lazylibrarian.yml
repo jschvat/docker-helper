@@ -1,1 +1,42 @@
 name: lazylibrarian
+description: "LazyLibrarian is a program to follow authors and grab metadata for all your digital reading needs. It uses a combination of Goodreads data and optionally Google Books as sources for author info and book info."
+image: linuxserver/lazylibrarian:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store LazyLibrarian's configuration."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/downloads"
+    description: "The host path where downloaded files will be stored."
+  - name: BOOKS_PATH
+    label: "Books Path"
+    type: path
+    default: "/books"
+    description: "The host path to your book library."
+
+ports:
+  - name: "WebUI"
+    host: 5299
+    container: 5299
+    protocol: "tcp"
+    description: "The port for the LazyLibrarian web interface."

@@ -1,1 +1,17 @@
 name: xteve
+description: "xTeVe is an M3U proxy for Plex, Emby and other PVR applications."
+image: dnsforge/xteve:latest
+
+variables:
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/root/.xteve"
+    description: "The host path to store xTeVe's configuration."
+
+ports:
+  - name: "WebUI"
+    host: 34400
+    container: 34400
+    protocol: "tcp"
+    description: "The port for the xTeVe web interface."

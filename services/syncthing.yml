@@ -1,1 +1,52 @@
 name: syncthing
+description: "Syncthing is a continuous file synchronization program. It synchronizes files between two or more computers in real time, safely protected from prying eyes."
+image: linuxserver/syncthing:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for Syncthing configuration files."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "Host path for the files you want to sync."
+
+ports:
+  - name: "WebUI"
+    host: 8384
+    container: 8384
+    protocol: "tcp"
+    description: "The port for the Syncthing web interface."
+  - name: "Sync_TCP"
+    host: 22000
+    container: 22000
+    protocol: "tcp"
+    description: "The port for Syncthing to communicate with other peers."
+  - name: "Sync_UDP"
+    host: 22000
+    container: 22000
+    protocol: "udp"
+    description: "The port for Syncthing to communicate with other peers (UDP)."
+  - name: "Discovery"
+    host: 21027
+    container: 21027
+    protocol: "udp"
+    description: "The port for local discovery."

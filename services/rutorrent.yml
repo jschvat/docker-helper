@@ -1,1 +1,47 @@
 name: rutorrent
+description: "ruTorrent is a front-end for the popular Bittorrent client rTorrent."
+image: linuxserver/rutorrent:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for ruTorrent and rTorrent configuration files."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/downloads"
+    description: "Host path where downloaded files will be stored."
+
+ports:
+  - name: "WebUI"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the ruTorrent web interface."
+  - name: "Torrenting"
+    host: 5000
+    container: 5000
+    protocol: "tcp"
+    description: "The port for rTorrent to listen for incoming connections."
+  - name: "DHT"
+    host: 6881
+    container: 6881
+    protocol: "udp"
+    description: "The port for DHT."

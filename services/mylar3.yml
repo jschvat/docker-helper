@@ -1,1 +1,42 @@
 name: mylar3
+description: "Mylar is an automated Comic Book downloader (cbr/cbz) for use with SABnzbd, NZBGet and torrents."
+image: linuxserver/mylar3:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Mylar3's configuration."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/downloads"
+    description: "The host path where your download client places completed downloads."
+  - name: COMICS_PATH
+    label: "Comics Path"
+    type: path
+    default: "/comics"
+    description: "The host path to your comic book library."
+
+ports:
+  - name: "WebUI"
+    host: 8090
+    container: 8090
+    protocol: "tcp"
+    description: "The port for the Mylar3 web interface."

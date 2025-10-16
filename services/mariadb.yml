@@ -1,1 +1,37 @@
 name: mariadb
+description: "MariaDB is a community-developed, commercially supported fork of the MySQL relational database management system."
+image: mariadb:latest
+
+variables:
+  - name: MYSQL_ROOT_PASSWORD
+    label: "Root Password"
+    type: string
+    default: "changeme"
+    description: "The root password for the MariaDB server. CHANGE THIS."
+  - name: MYSQL_DATABASE
+    label: "Database Name"
+    type: string
+    default: ""
+    description: "(Optional) A new database to be created on startup."
+  - name: MYSQL_USER
+    label: "Database User"
+    type: string
+    default: ""
+    description: "(Optional) A new user to be created."
+  - name: MYSQL_PASSWORD
+    label: "User Password"
+    type: string
+    default: ""
+    description: "(Optional) The password for the new user."
+  - name: MARIADB_DATA_PATH
+    label: "MariaDB Data Path"
+    type: path
+    default: "/var/lib/mysql"
+    description: "The host path to store MariaDB's data."
+
+ports:
+  - name: "Database"
+    host: 3306
+    container: 3306
+    protocol: "tcp"
+    description: "The port for connecting to the MariaDB server."

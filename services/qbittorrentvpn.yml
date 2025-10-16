@@ -1,1 +1,65 @@
 name: qbittorrentvpn
+description: "qBittorrent with a VPN connection. This container bundles qBittorrent and a VPN client to ensure all traffic goes through the VPN."
+image: binhex/arch-qbittorrentvpn:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: VPN_ENABLED
+    label: "Enable VPN"
+    type: boolean
+    default: true
+    description: "Set to false to disable the VPN connection (for testing)."
+  - name: VPN_PROV
+    label: "VPN Provider"
+    type: string
+    default: "pia"
+    description: "The VPN provider to use (e.g., pia, airvpn, nordvpn)."
+  - name: VPN_USER
+    label: "VPN Username"
+    type: string
+    default: ""
+    description: "Your VPN account username."
+  - name: VPN_PASS
+    label: "VPN Password"
+    type: string
+    default: ""
+    description: "Your VPN account password."
+  - name: LAN_NETWORK
+    label: "LAN Network"
+    type: string
+    default: "192.168.0.0/24"
+    description: "Your local network, to allow access to the web UI from other devices on your network."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for qBittorrent configuration files."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/data/completed"
+    description: "Host path where downloaded files will be stored."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the qBittorrent web interface."
+
+# Note: You will need to provide your VPN credentials and configure the VPN provider.
+# See the image documentation for more details on supported providers and options.

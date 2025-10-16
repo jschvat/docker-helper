@@ -1,1 +1,19 @@
 name: memcached
+description: "Memcached is a free & open source, high-performance, distributed memory object caching system, generic in nature, but intended for use in speeding up dynamic web applications by alleviating database load."
+image: memcached:latest
+
+variables:
+  - name: MEMCACHED_CACHE_SIZE
+    label: "Cache Size (MB)"
+    type: number
+    default: 64
+    description: "The maximum amount of memory to use for caching, in megabytes."
+
+ports:
+  - name: "Memcached"
+    host: 11211
+    container: 11211
+    protocol: "tcp"
+    description: "The port for connecting to the Memcached service."
+
+# Note: Memcached is an in-memory data store and does not persist data to disk.

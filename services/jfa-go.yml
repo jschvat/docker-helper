@@ -1,1 +1,24 @@
 name: jfa-go
+description: "jfa-go is a user management app for Jellyfin and Emby. It provides a web-based interface to create and manage users and their access to the media server."
+image: hrfee/jfa-go:latest
+
+variables:
+  - name: JFA_GO_CONFIG_PATH
+    label: "jfa-go Config Path"
+    type: path
+    default: "/data"
+    description: "The host path to store jfa-go's configuration and data."
+  - name: JELLYFIN_CONFIG_PATH
+    label: "Jellyfin Config Path (Optional)"
+    type: path
+    default: "/jf"
+    description: "The host path to your Jellyfin configuration. This is needed for the password reset functionality."
+
+ports:
+  - name: "WebUI"
+    host: 8056
+    container: 8056
+    protocol: "tcp"
+    description: "The port for the jfa-go web interface."
+
+# Note: To use the password reset feature, you must mount your Jellyfin configuration directory to the path specified in JELLYFIN_CONFIG_PATH.

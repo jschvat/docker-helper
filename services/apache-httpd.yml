@@ -1,1 +1,17 @@
 name: apache-httpd
+description: "The Apache HTTP Server, colloquially called Apache, is a free and open-source cross-platform web server software."
+image: httpd:latest
+
+variables:
+  - name: WEB_CONTENT_PATH
+    label: "Web Content Path"
+    type: path
+    default: "/usr/local/apache2/htdocs/"
+    description: "The host path containing your website files to be served by Apache."
+
+ports:
+  - name: "Web"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port to access the web server. Using 8080 on the host to avoid conflicts."

@@ -1,1 +1,5 @@
 name: busybox
+description: "BusyBox combines many common Unix utilities into a single small executable. It is often used for embedded systems and as a base for Docker containers."
+image: busybox:latest
+# This is a base image, so no default variables or ports are defined.
+# You can add them here if your specific use case requires them.

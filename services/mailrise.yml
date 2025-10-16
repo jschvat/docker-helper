@@ -1,1 +1,20 @@
 name: mailrise
+description: "Mailrise is an SMTP gateway for Apprise. It allows you to receive email notifications and forward them to a variety of services."
+image: yoryan/mailrise:latest
+
+variables:
+  - name: MAILRISE_CONFIG_PATH
+    label: "Mailrise Config Path"
+    type: path
+    default: "/etc/mailrise.conf"
+    description: "The host path to your mailrise.conf file."
+
+ports:
+  - name: "SMTP"
+    host: 8025
+    container: 8025
+    protocol: "tcp"
+    description: "The port for the Mailrise SMTP server."
+
+# Note: You need to create a mailrise.conf file and mount it to the path specified in MAILRISE_CONFIG_PATH.
+# This file contains your Apprise notification configurations.

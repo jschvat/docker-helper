@@ -1,1 +1,35 @@
 name: nagios-core
+description: "Nagios Core is an open source monitoring and alerting service for servers, switches, applications, and services."
+image: instantlinux/nagios:latest
+
+variables:
+  - name: NAGIOSADMIN_USER
+    label: "Admin User"
+    type: string
+    default: "nagiosadmin"
+    description: "The username for the Nagios web interface."
+  - name: NAGIOSADMIN_PASS
+    label: "Admin Password"
+    type: string
+    default: "nagiosadmin"
+    description: "The password for the Nagios web interface. CHANGE THIS."
+  - name: NAGIOS_ETC_PATH
+    label: "Nagios Etc Path"
+    type: path
+    default: "/opt/nagios/etc"
+    description: "The host path to store Nagios' configuration files."
+  - name: NAGIOS_VAR_PATH
+    label: "Nagios Var Path"
+    type: path
+    default: "/opt/nagios/var"
+    description: "The host path to store Nagios' data, logs, and status files."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Nagios web interface."
+
+# Note: The default credentials are nagiosadmin/nagiosadmin.
+# It is highly recommended to change the password.

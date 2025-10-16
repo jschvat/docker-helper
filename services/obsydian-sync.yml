@@ -1,1 +1,20 @@
-name: obsydian-sync
+name: obsidian-sync
+description: "A self-hosted sync server for Obsidian. This allows you to sync your Obsidian vaults across devices without using Obsidian Sync."
+image: rembo10/obsidian-sync:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store the sync server's data."
+
+ports:
+  - name: "Web"
+    host: 5000
+    container: 5000
+    protocol: "tcp"
+    description: "The port for the Obsidian sync server."
+
+# Note: You will need to configure the Obsidian app to use this self-hosted sync server.
+# See the image documentation for more details.

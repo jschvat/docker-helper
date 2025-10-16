@@ -1,1 +1,22 @@
 name: node-red
+description: "Node-RED is a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
+image: nodered/node-red:latest
+
+variables:
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store Node-RED's data and configuration."
+
+ports:
+  - name: "WebUI"
+    host: 1880
+    container: 1880
+    protocol: "tcp"
+    description: "The port for the Node-RED web interface."

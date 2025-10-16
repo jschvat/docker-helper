@@ -1,1 +1,62 @@
 name: omada-controller
+description: "The Omada Controller software allows for centralized management of TP-Link Omada EAPs, Switches, and Gateways."
+image: mbentley/omada-controller:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/opt/tplink/EAPController/data"
+    description: "The host path to store the Omada Controller's data."
+  - name: LOGS_PATH
+    label: "Logs Path"
+    type: path
+    default: "/opt/tplink/EAPController/logs"
+    description: "The host path to store the Omada Controller's logs."
+
+ports:
+  - name: "WebUI"
+    host: 8043
+    container: 8043
+    protocol: "tcp"
+    description: "The port for the Omada Controller web interface."
+  - name: "Controller"
+    host: 8088
+    container: 8088
+    protocol: "tcp"
+    description: "The port for the Omada Controller."
+  - name: "Discovery"
+    host: 29810
+    container: 29810
+    protocol: "udp"
+    description: "The port for device discovery."
+  - name: "Adoption"
+    host: 29811
+    container: 29811
+    protocol: "tcp"
+    description: "The port for device adoption."
+  - name: "Upgrade"
+    host: 29812
+    container: 29812
+    protocol: "tcp"
+    description: "The port for device upgrades."
+  - name: "Manager"
+    host: 29813
+    container: 29813
+    protocol: "tcp"
+    description: "The port for the device manager."

@@ -1,1 +1,36 @@
 name: netdata
+description: "Netdata is a distributed, real-time, performance and health monitoring solution for systems and applications."
+image: netdata/netdata:latest
+
+variables:
+  - name: NETDATA_CONFIG_PATH
+    label: "Netdata Config Path"
+    type: path
+    default: "/etc/netdata"
+    description: "The host path to store Netdata's configuration."
+  - name: NETDATA_LIB_PATH
+    label: "Netdata Lib Path"
+    type: path
+    default: "/var/lib/netdata"
+    description: "The host path to store Netdata's data."
+  - name: NETDATA_CACHE_PATH
+    label: "Netdata Cache Path"
+    type: path
+    default: "/var/cache/netdata"
+    description: "The host path to store Netdata's cache."
+
+ports:
+  - name: "WebUI"
+    host: 19999
+    container: 19999
+    protocol: "tcp"
+    description: "The port for the Netdata web interface."
+
+# Note: Netdata requires access to the host's system information to be useful.
+# You will need to run this container with the following options:
+#   --pid=host
+#   --network=host
+#   --cap-add=SYS_PTRACE
+#   -v /proc:/host/proc:ro
+#   -v /sys:/host/sys:ro
+#   -v /var/run/docker.sock:/var/run/docker.sock:ro

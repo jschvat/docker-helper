@@ -1,1 +1,56 @@
 name: firefly-iii
+description: "Firefly III is a self-hosted manager for your personal finances. It can help you keep track of your expenses and income, so you can spend less and save more."
+image: fireflyiii/core:latest
+
+variables:
+  - name: DB_HOST
+    label: "Database Host"
+    type: string
+    default: "firefly_iii_db"
+    description: "The hostname of the database server."
+  - name: DB_PORT
+    label: "Database Port"
+    type: number
+    default: 3306
+    description: "The port of the database server."
+  - name: DB_DATABASE
+    label: "Database Name"
+    type: string
+    default: "firefly"
+    description: "The name of the database to use."
+  - name: DB_USERNAME
+    label: "Database User"
+    type: string
+    default: "firefly"
+    description: "The username for the database connection."
+  - name: DB_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: APP_KEY
+    label: "App Key"
+    type: string
+    default: "changeme"
+    description: "A unique 32-character string for encryption. Generate a random one. CHANGE THIS."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: APP_URL
+    label: "Application URL"
+    type: string
+    default: "http://localhost:8080"
+    description: "The full URL where Firefly III will be accessible."
+
+ports:
+  - name: "Web"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port to access the Firefly III web interface."
+
+# Note: Firefly III requires a MySQL or PostgreSQL database.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the DB_* variables accordingly.

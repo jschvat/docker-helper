@@ -1,1 +1,56 @@
 name: bookstack
+description: "BookStack is a simple, self-hosted, easy-to-use platform for organising and storing information."
+image: lscr.io/linuxserver/bookstack:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: APP_URL
+    label: "Application URL"
+    type: string
+    default: "http://localhost:6875"
+    description: "The full URL where BookStack will be accessible."
+  - name: DB_HOST
+    label: "Database Host"
+    type: string
+    default: "bookstack_db"
+    description: "The hostname of the database server."
+  - name: DB_PORT
+    label: "Database Port"
+    type: number
+    default: 3306
+    description: "The port of the database server."
+  - name: DB_USER
+    label: "Database User"
+    type: string
+    default: "bookstack"
+    description: "The username for the database connection."
+  - name: DB_PASS
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: DB_DATABASE
+    label: "Database Name"
+    type: string
+    default: "bookstackapp"
+    description: "The name of the database to use."
+
+ports:
+  - name: "Web"
+    host: 6875
+    container: 80
+    protocol: "tcp"
+    description: "The port to access the BookStack web interface."
+
+# Note: BookStack requires a MySQL or MariaDB database.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the DB_* variables accordingly.

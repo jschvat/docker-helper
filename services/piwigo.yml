@@ -1,1 +1,61 @@
 name: piwigo
+description: "Piwigo is a free and open source photo gallery software for the web."
+image: linuxserver/piwigo:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: MYSQL_DATABASE
+    label: "Database Name"
+    type: string
+    default: "piwigo"
+    description: "The name of the Piwigo database."
+  - name: MYSQL_USER
+    label: "Database User"
+    type: string
+    default: "piwigo"
+    description: "The username for the database connection."
+  - name: MYSQL_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: MYSQL_HOST
+    label: "Database Host"
+    type: string
+    default: "piwigo_db"
+    description: "The hostname of the database server."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Piwigo's configuration."
+  - name: GALLERY_PATH
+    label: "Gallery Path"
+    type: path
+    default: "/gallery"
+    description: "The host path to your photo gallery."
+
+ports:
+  - name: "WebUI"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Piwigo web interface."
+
+# Note: Piwigo requires a MySQL/MariaDB database.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the MYSQL_* variables accordingly.

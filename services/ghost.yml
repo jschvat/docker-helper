@@ -1,1 +1,46 @@
 name: ghost
+description: "Ghost is a free and open source blogging platform written in JavaScript and distributed under the MIT License, designed to simplify the process of online publishing for individual bloggers as well as online publications."
+image: ghost:latest
+
+variables:
+  - name: url
+    label: "Blog URL"
+    type: string
+    default: "http://localhost:2368"
+    description: "The full URL where your Ghost blog will be accessible."
+  - name: database__client
+    label: "Database Client"
+    type: string
+    default: "mysql"
+    description: "The type of database to use (mysql or sqlite3)."
+  - name: database__connection__host
+    label: "Database Host"
+    type: string
+    default: "ghost_db"
+    description: "The hostname of the database server."
+  - name: database__connection__user
+    label: "Database User"
+    type: string
+    default: "ghost"
+    description: "The username for the database connection."
+  - name: database__connection__password
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: database__connection__database
+    label: "Database Name"
+    type: string
+    default: "ghost"
+    description: "The name of the database to use."
+
+ports:
+  - name: "Web"
+    host: 2368
+    container: 2368
+    protocol: "tcp"
+    description: "The port to access the Ghost blog."
+
+# Note: Ghost requires a MySQL database for production.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the database__* variables accordingly.

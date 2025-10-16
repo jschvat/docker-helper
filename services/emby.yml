@@ -1,1 +1,62 @@
 name: emby
+description: "Emby is a media server that organizes, plays, and streams audio and video to a variety of devices."
+image: linuxserver/emby:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Emby's configuration and metadata."
+  - name: MOVIES_PATH
+    label: "Movies Path"
+    type: path
+    default: "/data/movies"
+    description: "The host path to your movie library."
+  - name: TV_PATH
+    label: "TV Shows Path"
+    type: path
+    default: "/data/tvshows"
+    description: "The host path to your TV show library."
+
+ports:
+  - name: "WebUI"
+    host: 8096
+    container: 8096
+    protocol: "tcp"
+    description: "The port for the Emby web interface."
+  - name: "HTTPS"
+    host: 8920
+    container: 8920
+    protocol: "tcp"
+    description: "The port for HTTPS access to the Emby web interface."
+  - name: "Discovery"
+    host: 7359
+    container: 7359
+    protocol: "udp"
+    description: "The port for Emby discovery."
+  - name: "DLNA"
+    host: 1900
+    container: 1900
+    protocol: "udp"
+    description: "The port for DLNA discovery."
+
+# To enable hardware acceleration, you may need to pass a device to the container.
+# For example, for Intel Quick Sync:
+# devices:
+#   - /dev/dri:/dev/dri

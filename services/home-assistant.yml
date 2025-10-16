@@ -1,1 +1,26 @@
 name: home-assistant
+description: "Home Assistant is an open-source home automation platform that focuses on privacy and local control."
+image: homeassistant/home-assistant:stable
+
+variables:
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Home Assistant's configuration files."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+
+ports:
+  - name: "WebUI"
+    host: 8123
+    container: 8123
+    protocol: "tcp"
+    description: "The port for the Home Assistant web interface."
+
+# Note: Home Assistant needs to be run with host networking to discover devices on your network.
+# It is recommended to run this container with the --network=host option.
+# You may also need to pass devices to the container for Zigbee or Z-Wave controllers.

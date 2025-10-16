@@ -1,1 +1,31 @@
 name: commento
+description: "Commento is a fast, privacy-focused commenting system that you can embed in your website."
+image: registry.gitlab.com/commento/commento
+
+variables:
+  - name: COMMENTO_ORIGIN
+    label: "Origin URL"
+    type: string
+    default: "http://localhost:8080"
+    description: "The URL where Commento will be hosted."
+  - name: COMMENTO_PORT
+    label: "Port"
+    type: number
+    default: 8080
+    description: "The port the Commento server will listen on."
+  - name: COMMENTO_POSTGRES
+    label: "PostgreSQL Connection String"
+    type: string
+    default: "postgres://commento:changeme@postgres:5432/commento?sslmode=disable"
+    description: "The connection string for the PostgreSQL database. Replace 'changeme' with your password."
+
+ports:
+  - name: "Web"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port to access the Commento web interface."
+
+# Note: Commento requires a PostgreSQL database.
+# You will need to set up a separate database service (e.g., postgresql)
+# and configure the COMMENTO_POSTGRES variable accordingly.

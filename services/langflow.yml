@@ -1,1 +1,22 @@
 name: langflow
+description: "Langflow is a UI for LangChain, designed with react-flow to provide an effortless way to experiment and prototype flows."
+image: langflowai/langflow:latest
+
+variables:
+  - name: LANGFLOW_HOST
+    label: "Host"
+    type: string
+    default: "0.0.0.0"
+    description: "The host that Langflow will listen on."
+  - name: LANGFLOW_PORT
+    label: "Port"
+    type: number
+    default: 7860
+    description: "The port that Langflow will listen on."
+
+ports:
+  - name: "WebUI"
+    host: 7860
+    container: 7860
+    protocol: "tcp"
+    description: "The port for the Langflow web interface."

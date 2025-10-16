@@ -1,1 +1,17 @@
 name: uptime-kuma
+description: "Uptime Kuma is a fancy self-hosted monitoring tool."
+image: louislam/uptime-kuma:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/app/data"
+    description: "The host path to store Uptime Kuma's data."
+
+ports:
+  - name: "WebUI"
+    host: 3001
+    container: 3001
+    protocol: "tcp"
+    description: "The port for the Uptime Kuma web interface."

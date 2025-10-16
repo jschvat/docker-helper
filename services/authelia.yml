@@ -1,1 +1,22 @@
 name: authelia
+description: "Authelia is an open-source authentication and authorization server providing 2-factor authentication and single sign-on (SSO) for your applications via a web portal."
+image: authelia/authelia:latest
+
+variables:
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path where your Authelia configuration files (configuration.yml, users_database.yml) are stored."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+
+ports:
+  - name: "Web"
+    host: 9091
+    container: 9091
+    protocol: "tcp"
+    description: "The port for the Authelia web interface."

@@ -1,1 +1,27 @@
 name: portainer
+description: "Portainer is a lightweight management UI which allows you to easily manage your different Docker environments (Docker hosts or Swarm clusters)."
+image: portainer/portainer-ce:latest
+
+variables:
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store Portainer's data."
+
+ports:
+  - name: "WebUI"
+    host: 9000
+    container: 9000
+    protocol: "tcp"
+    description: "The port for the Portainer web interface."
+  - name: "Edge"
+    host: 8000
+    container: 8000
+    protocol: "tcp"
+    description: "The port for the Portainer Edge Agent."

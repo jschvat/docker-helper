@@ -1,1 +1,25 @@
 name: node.js
+description: "Node.js is a JavaScript runtime built on Chrome's V8 JavaScript engine. It's designed to build scalable network applications."
+image: node:latest
+
+variables:
+  - name: APP_PATH
+    label: "Application Path"
+    type: path
+    default: "/usr/src/app"
+    description: "The host path containing your Node.js application code."
+  - name: NODE_ENV
+    label: "Node Environment"
+    type: string
+    default: "production"
+    description: "The runtime environment for your application (e.g., production, development)."
+
+ports:
+  - name: "Web"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port your Node.js application listens on."
+
+# Note: You will need to have a package.json file in your APP_PATH.
+# The container will automatically run 'npm install' and then 'npm start'.

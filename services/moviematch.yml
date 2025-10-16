@@ -1,1 +1,25 @@
 name: moviematch
+description: "A movie matching app for Plex. Swipe through your Plex library with friends to find a movie to watch."
+image: lukechannings/moviematch:latest
+
+variables:
+  - name: PLEX_URL
+    label: "Plex URL"
+    type: string
+    default: "http://plex:32400"
+    description: "The URL of your Plex server."
+  - name: PLEX_TOKEN
+    label: "Plex Token"
+    type: string
+    default: ""
+    description: "Your Plex authentication token."
+
+ports:
+  - name: "WebUI"
+    host: 8000
+    container: 8000
+    protocol: "tcp"
+    description: "The port for the MovieMatch web interface."
+
+# Note: You can find your Plex token by following the instructions here:
+# https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/

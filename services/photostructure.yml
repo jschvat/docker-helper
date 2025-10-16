@@ -1,1 +1,47 @@
 name: photostructure
+description: "PhotoStructure is a personal photo and video library that organizes and de-duplicates your files."
+image: photostructure/server:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: PS_LIBRARY_PATH
+    label: "Library Path"
+    type: path
+    default: "/ps/library"
+    description: "The host path to your PhotoStructure library."
+  - name: PS_CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/ps/config"
+    description: "The host path to store PhotoStructure's configuration."
+  - name: PS_LOGS_PATH
+    label: "Logs Path"
+    type: path
+    default: "/ps/logs"
+    description: "The host path to store PhotoStructure's logs."
+  - name: PS_TMP_PATH
+    label: "Temp Path"
+    type: path
+    default: "/ps/tmp"
+    description: "The host path for temporary files."
+
+ports:
+  - name: "WebUI"
+    host: 1787
+    container: 1787
+    protocol: "tcp"
+    description: "The port for the PhotoStructure web interface."

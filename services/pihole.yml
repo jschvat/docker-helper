@@ -1,1 +1,54 @@
 name: pihole
+description: "Pi-hole is a Linux network-level advertisement and Internet tracker blocking application which acts as a DNS sinkhole and optionally a DHCP server, intended for use on a private network."
+image: pihole/pihole:latest
+
+variables:
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: WEBPASSWORD
+    label: "Web Password"
+    type: string
+    default: "admin"
+    description: "The password for the Pi-hole web interface. CHANGE THIS."
+  - name: PIHOLE_DNS_
+    label: "Upstream DNS"
+    type: string
+    default: "1.1.1.1;1.0.0.1"
+    description: "The upstream DNS servers to use, separated by semicolons."
+  - name: ETC_PIHOLE_PATH
+    label: "Etc Pi-hole Path"
+    type: path
+    default: "/etc/pihole"
+    description: "The host path to store Pi-hole's configuration."
+  - name: DNSMASQ_D_PATH
+    label: "Dnsmasq.d Path"
+    type: path
+    default: "/etc/dnsmasq.d"
+    description: "The host path to store custom dnsmasq configuration files."
+
+ports:
+  - name: "DNS_TCP"
+    host: 53
+    container: 53
+    protocol: "tcp"
+    description: "DNS query port."
+  - name: "DNS_UDP"
+    host: 53
+    container: 53
+    protocol: "udp"
+    description: "DNS query port (UDP)."
+  - name: "WebUI"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "Pi-hole web interface."
+  - name: "DHCP"
+    host: 67
+    container: 67
+    protocol: "udp"
+    description: "DHCP server port (optional)."
+
+# Note: For Pi-hole to function as a DHCP server, you will need to run the container with the --net=host option.

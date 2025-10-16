@@ -1,1 +1,27 @@
 name: arangodb
+description: "ArangoDB is a native multi-model database with flexible data models for documents, graphs, and key-values. Build high performance applications using a convenient SQL-like query language or JavaScript extensions."
+image: arangodb:latest
+
+variables:
+  - name: ARANGO_ROOT_PASSWORD
+    label: "Root Password"
+    type: string
+    default: "changeme"
+    description: "The root password for the ArangoDB instance. CHANGE THIS to a secure password."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/var/lib/arangodb3"
+    description: "The host path for the ArangoDB database data."
+  - name: APPS_PATH
+    label: "Apps Path"
+    type: path
+    default: "/var/lib/arangodb3-apps"
+    description: "The host path for ArangoDB Foxx apps."
+
+ports:
+  - name: "WebUI"
+    host: 8529
+    container: 8529
+    protocol: "tcp"
+    description: "The port for the ArangoDB web interface."

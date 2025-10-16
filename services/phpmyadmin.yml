@@ -1,1 +1,37 @@
 name: phpmyadmin
+description: "phpMyAdmin is a free software tool written in PHP, intended to handle the administration of MySQL over the Web."
+image: phpmyadmin/phpmyadmin:latest
+
+variables:
+  - name: PMA_HOST
+    label: "MySQL Host"
+    type: string
+    default: "mysql"
+    description: "The hostname of the MySQL/MariaDB server."
+  - name: PMA_PORT
+    label: "MySQL Port"
+    type: number
+    default: 3306
+    description: "The port of the MySQL/MariaDB server."
+  - name: PMA_USER
+    label: "MySQL User"
+    type: string
+    default: "root"
+    description: "The username for the MySQL connection."
+  - name: PMA_PASSWORD
+    label: "MySQL Password"
+    type: string
+    default: "changeme"
+    description: "The password for the MySQL connection."
+  - name: UPLOAD_LIMIT
+    label: "Upload Limit"
+    type: string
+    default: "2048M"
+    description: "The maximum upload size for files."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 80
+    protocol: "tcp"
+    description: "The port for the phpMyAdmin web interface."

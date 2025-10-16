@@ -1,1 +1,22 @@
 name: tsdproxy
+description: "tsdproxy (Tailscale Docker Proxy) is a proxy that automatically exposes Docker containers to your Tailscale network."
+image: almeidapaulopt/tsdproxy:latest
+
+variables:
+  - name: TS_AUTH_KEY
+    label: "Tailscale Auth Key"
+    type: string
+    default: ""
+    description: "Your Tailscale authentication key."
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host."
+
+# This service does not expose any ports to the host network.
+# It runs in the background and exposes other containers to your Tailscale network.
+# You need to add labels to the containers you want to expose.
+# Example labels for another container:
+#   - "tsdproxy.enable=true"
+#   - "tsdproxy.name=my-service"

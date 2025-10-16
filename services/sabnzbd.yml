@@ -1,1 +1,47 @@
 name: sabnzbd
+description: "SABnzbd is a free and easy-to-use binary newsreader that automates the process of downloading and processing files from Usenet."
+image: linuxserver/sabnzbd:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions. See https://docs.linuxserver.io/general/understanding-puid-and-pgid"
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for SABnzbd configuration files."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/downloads"
+    description: "Host path where downloaded files will be stored."
+  - name: INCOMPLETE_DOWNLOADS_PATH
+    label: "Incomplete Downloads Path"
+    type: path
+    default: "/incomplete-downloads"
+    description: "Host path for incomplete downloads."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the SABnzbd web interface."
+  - name: "WebUI-HTTPS"
+    host: 9090
+    container: 9090
+    protocol: "tcp"
+    description: "The port for the SABnzbd web interface (HTTPS)."

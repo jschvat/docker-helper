@@ -1,1 +1,17 @@
 name: requestrr
+description: "Requestrr is a chatbot that allows you to request content for your media server through Discord."
+image: thomst08/requestrr:latest
+
+variables:
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/root/config"
+    description: "The host path to store Requestrr's configuration files."
+
+ports:
+  - name: "WebUI"
+    host: 4545
+    container: 4545
+    protocol: "tcp"
+    description: "The port for the Requestrr web interface."

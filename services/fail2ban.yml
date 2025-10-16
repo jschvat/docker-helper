@@ -1,1 +1,37 @@
 name: fail2ban
+description: "Fail2Ban is an intrusion prevention software framework that protects computer servers from brute-force attacks."
+image: linuxserver/fail2ban:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Fail2Ban's configuration files."
+  - name: LOG_PATH
+    label: "Log Path"
+    type: path
+    default: "/var/log"
+    description: "The host path to the log files that Fail2Ban should monitor."
+
+# Note: Fail2Ban requires elevated privileges to modify firewall rules.
+# You will need to run this container with the following options:
+#   --cap-add=NET_ADMIN --cap-add=NET_RAW
+#   --network=host
+# It is also recommended to mount the Docker log directory to monitor Docker-related logs:
+#   -v /var/lib/docker/containers:/var/lib/docker/containers:ro

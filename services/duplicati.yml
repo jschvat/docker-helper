@@ -1,1 +1,47 @@
 name: duplicati
+description: "Duplicati is a free, open source, backup client that securely stores encrypted, incremental, compressed backups on cloud storage services and remote file servers."
+image: lscr.io/linuxserver/duplicati:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CLI_ARGS
+    label: "CLI Arguments"
+    type: string
+    default: ""
+    description: "Optional additional command-line arguments for Duplicati."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Duplicati's configuration and database."
+  - name: BACKUPS_PATH
+    label: "Backups Path"
+    type: path
+    default: "/backups"
+    description: "The host path to store local backups."
+  - name: SOURCE_PATH
+    label: "Source Path"
+    type: path
+    default: "/source"
+    description: "The host path of the data you want to back up."
+
+ports:
+  - name: "WebUI"
+    host: 8200
+    container: 8200
+    protocol: "tcp"
+    description: "The port for the Duplicati Web UI."

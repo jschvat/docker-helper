@@ -1,1 +1,32 @@
 name: hashicorp-vault
+description: "HashiCorp Vault is a secrets management tool that provides a secure way to store and control access to tokens, passwords, certificates, and encryption keys."
+image: hashicorp/vault:latest
+
+variables:
+  - name: VAULT_DEV_ROOT_TOKEN_ID
+    label: "Root Token ID"
+    type: string
+    default: "root"
+    description: "The root token for development mode."
+  - name: VAULT_LOG_LEVEL
+    label: "Log Level"
+    type: string
+    default: "info"
+    description: "The log level for Vault (e.g., trace, debug, info, warn, err)."
+  - name: VAULT_UI
+    label: "Enable UI"
+    type: boolean
+    default: true
+    description: "Enable the Vault web UI."
+
+ports:
+  - name: "WebUI"
+    host: 8200
+    container: 8200
+    protocol: "tcp"
+    description: "The port for the Vault API and web UI."
+
+# Note: This configuration is for development mode only.
+# For production, you should use a persistent storage backend and a more secure authentication method.
+# It is also recommended to run the container with the --cap-add=IPC_LOCK option.
+# See the official HashiCorp Vault documentation for production deployment guidance.

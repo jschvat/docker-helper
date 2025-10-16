@@ -1,1 +1,52 @@
 name: time-machine
+description: "A Docker container that provides a Time Machine backup service for macOS clients."
+image: mbentley/timemachine:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: TM_USERNAME
+    label: "Time Machine Username"
+    type: string
+    default: "timemachine"
+    description: "The username for the Time Machine user."
+  - name: TM_PASSWORD
+    label: "Time Machine Password"
+    type: string
+    default: "changeme"
+    description: "The password for the Time Machine user. CHANGE THIS."
+  - name: TM_VOLUME_SIZE_LIMIT
+    label: "Volume Size Limit (MB)"
+    type: number
+    default: 0
+    description: "The maximum size of the Time Machine volume in megabytes. 0 for no limit."
+  - name: BACKUP_PATH
+    label: "Backup Path"
+    type: path
+    default: "/backups"
+    description: "The host path where the Time Machine backups will be stored."
+
+ports:
+  - name: "Netatalk"
+    host: 548
+    container: 548
+    protocol: "tcp"
+    description: "The port for the Netatalk (AFP) service."
+  - name: "Avahi"
+    host: 5353
+    container: 5353
+    protocol: "udp"
+    description: "The port for Avahi (Bonjour) service discovery."

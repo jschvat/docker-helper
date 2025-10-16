@@ -1,1 +1,30 @@
 name: openvpn
+description: "OpenVPN is a virtual private network (VPN) system that implements techniques to create secure point-to-point or site-to-site connections in routed or bridged configurations and remote access facilities."
+image: kylemanna/openvpn:latest
+
+variables:
+  - name: OVPN_DATA
+    label: "OpenVPN Data Path"
+    type: path
+    default: "/etc/openvpn"
+    description: "The host path to store OpenVPN's configuration and data."
+  - name: OVPN_SERVER_URL
+    label: "Server URL"
+    type: string
+    default: "udp://vpn.example.com:1194"
+    description: "The URL that clients will use to connect to the VPN server."
+
+ports:
+  - name: "OpenVPN"
+    host: 1194
+    container: 1194
+    protocol: "udp"
+    description: "The port for OpenVPN clients to connect to."
+
+# Note: This container requires a one-time configuration process to generate certificates and keys.
+# You will need to run the following commands:
+# 1. docker-compose run --rm openvpn ovpn_genconfig -u udp://vpn.example.com
+# 2. docker-compose run --rm openvpn ovpn_initpki
+# 3. docker-compose up -d openvpn
+# 4. docker-compose run --rm openvpn easyrsa build-client-full clientname nopass
+# 5. docker-compose run --rm openvpn ovpn_getclient clientname > clientname.ovpn

@@ -1,1 +1,42 @@
 name: sickchill
+description: "SickChill is an automatic Video Library Manager for TV Shows. It watches for new episodes of your favorite shows, and when they are posted it does its magic."
+image: linuxserver/sickchill:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store SickChill's configuration."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/downloads"
+    description: "The host path where your download client places completed downloads."
+  - name: TV_PATH
+    label: "TV Shows Path"
+    type: path
+    default: "/tv"
+    description: "The host path to your TV show library."
+
+ports:
+  - name: "WebUI"
+    host: 8081
+    container: 8081
+    protocol: "tcp"
+    description: "The port for the SickChill web interface."

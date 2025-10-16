@@ -1,1 +1,37 @@
 name: snapdrop
+description: "Snapdrop is a local file-sharing application inspired by Apple's AirDrop."
+image: linuxserver/snapdrop:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Snapdrop's configuration."
+
+ports:
+  - name: "HTTP"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Snapdrop web interface."
+  - name: "HTTPS"
+    host: 443
+    container: 443
+    protocol: "tcp"
+    description: "The port for the Snapdrop web interface (HTTPS)."

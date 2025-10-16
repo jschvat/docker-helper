@@ -1,1 +1,27 @@
 name: mongodb
+description: "MongoDB is a source-available cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with optional schemas."
+image: mongo:latest
+
+variables:
+  - name: MONGO_INITDB_ROOT_USERNAME
+    label: "Root Username"
+    type: string
+    default: "admin"
+    description: "The username for the root user."
+  - name: MONGO_INITDB_ROOT_PASSWORD
+    label: "Root Password"
+    type: string
+    default: "changeme"
+    description: "The password for the root user. CHANGE THIS."
+  - name: MONGODB_DATA_PATH
+    label: "MongoDB Data Path"
+    type: path
+    default: "/data/db"
+    description: "The host path to store MongoDB's data."
+
+ports:
+  - name: "Database"
+    host: 27017
+    container: 27017
+    protocol: "tcp"
+    description: "The port for connecting to the MongoDB server."

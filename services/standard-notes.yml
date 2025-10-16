@@ -1,1 +1,17 @@
 name: standard-notes
+description: "A self-hosted server for Standard Notes, a free, open-source, and end-to-end encrypted notes app."
+image: standardnotes/standalone:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/var/lib/standardnotes"
+    description: "The host path to store Standard Notes' data."
+
+ports:
+  - name: "Web"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port for the Standard Notes server."

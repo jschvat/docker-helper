@@ -1,1 +1,37 @@
 name: ombi
+description: "Ombi is a self-hosted web application that automatically gives your shared Plex, Emby, or Jellyfin users the ability to request content which is then added to your library."
+image: linuxserver/ombi:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions. See https://docs.linuxserver.io/general/understanding-puid-and-pgid"
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: BASE_URL
+    label: "Base URL"
+    type: string
+    default: "/"
+    description: "The base URL for the Ombi web interface, e.g., /ombi."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for Ombi configuration files."
+
+ports:
+  - name: "WebUI"
+    host: 3579
+    container: 3579
+    protocol: "tcp"
+    description: "The port for the Ombi web interface."

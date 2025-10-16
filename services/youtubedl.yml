@@ -1,1 +1,22 @@
 name: youtubedl
+description: "A web-based UI for youtube-dl, allowing you to download videos from YouTube and other sites."
+image: tzahi12345/youtubedl-material:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/app/appdata"
+    description: "The host path to store youtubedl-material's data."
+  - name: DOWNLOADS_PATH
+    label: "Downloads Path"
+    type: path
+    default: "/app/downloads"
+    description: "The host path where downloaded files will be stored."
+
+ports:
+  - name: "WebUI"
+    host: 8998
+    container: 8998
+    protocol: "tcp"
+    description: "The port for the youtubedl-material web interface."

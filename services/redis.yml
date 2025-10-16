@@ -1,1 +1,22 @@
 name: redis
+description: "Redis is an in-memory data structure store, used as a database, cache and message broker."
+image: redis:latest
+
+variables:
+  - name: REDIS_PASSWORD
+    label: "Password"
+    type: string
+    default: ""
+    description: "The password for the Redis server. If not set, Redis will not require a password."
+  - name: REDIS_DATA_PATH
+    label: "Redis Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store Redis's data."
+
+ports:
+  - name: "Redis"
+    host: 6379
+    container: 6379
+    protocol: "tcp"
+    description: "The port for connecting to the Redis server."

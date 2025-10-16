@@ -1,1 +1,42 @@
 name: resilio-sync
+description: "Resilio Sync is a fast, reliable, and simple file synchronization tool."
+image: linuxserver/resilio-sync:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for Resilio Sync configuration files."
+  - name: SYNC_PATH
+    label: "Sync Path"
+    type: path
+    default: "/sync"
+    description: "Host path for the files you want to sync."
+
+ports:
+  - name: "WebUI"
+    host: 8888
+    container: 8888
+    protocol: "tcp"
+    description: "The port for the Resilio Sync web interface."
+  - name: "Sync"
+    host: 55555
+    container: 55555
+    protocol: "tcp"
+    description: "The port for Resilio Sync to communicate with other peers."

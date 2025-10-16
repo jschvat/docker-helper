@@ -1,1 +1,32 @@
 name: tautulli
+description: "Tautulli is a 3rd party application that you can run alongside your Plex Media Server to monitor activity and track various statistics."
+image: linuxserver/tautulli:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for Tautulli configuration files."
+
+ports:
+  - name: "WebUI"
+    host: 8181
+    container: 8181
+    protocol: "tcp"
+    description: "The port for the Tautulli web interface."

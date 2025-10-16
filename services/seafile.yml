@@ -1,1 +1,46 @@
 name: seafile
+description: "Seafile is an open source, self-hosted file synchronization and sharing solution."
+image: seafileltd/seafile-mc:latest
+
+variables:
+  - name: DB_HOST
+    label: "Database Host"
+    type: string
+    default: "seafile_db"
+    description: "The hostname of the database server."
+  - name: DB_ROOT_PASSWD
+    label: "Database Root Password"
+    type: string
+    default: "changeme"
+    description: "The root password for the database server. CHANGE THIS."
+  - name: SEAFILE_SERVER_HOSTNAME
+    label: "Server Hostname"
+    type: string
+    default: "seafile.example.com"
+    description: "The hostname of your Seafile server."
+  - name: SEAFILE_ADMIN_EMAIL
+    label: "Admin Email"
+    type: string
+    default: "admin@example.com"
+    description: "The email address for the Seafile admin account."
+  - name: SEAFILE_ADMIN_PASSWORD
+    label: "Admin Password"
+    type: string
+    default: "admin"
+    description: "The password for the Seafile admin account. CHANGE THIS."
+  - name: SEAFILE_DATA_PATH
+    label: "Seafile Data Path"
+    type: path
+    default: "/shared"
+    description: "The host path to store Seafile's data."
+
+ports:
+  - name: "WebUI"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Seafile web interface."
+
+# Note: Seafile requires a MariaDB/MySQL database.
+# This image includes a MariaDB server. You can also use an external database.
+# See the Seafile documentation for more details.

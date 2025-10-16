@@ -1,1 +1,31 @@
 name: petio
+description: "Petio is a third-party companion app for Plex, Emby, and Jellyfin. It allows users to request, review, and discover media."
+image: petio/petio:latest
+
+variables:
+  - name: MONGO_URL
+    label: "MongoDB URL"
+    type: string
+    default: "mongodb://petio_db:27017/petio"
+    description: "The connection string for the MongoDB database."
+  - name: JWT_SECRET
+    label: "JWT Secret"
+    type: string
+    default: "changeme"
+    description: "A secret for signing JWTs. Generate a random one. CHANGE THIS."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/app/data"
+    description: "The host path to store Petio's data."
+
+ports:
+  - name: "WebUI"
+    host: 4000
+    container: 4000
+    protocol: "tcp"
+    description: "The port for the Petio web interface."
+
+# Note: Petio requires a MongoDB database.
+# You will need to set up a separate database service (e.g., mongodb)
+# and configure the MONGO_URL variable accordingly.

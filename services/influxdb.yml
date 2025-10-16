@@ -1,1 +1,47 @@
 name: influxdb
+description: "InfluxDB is a time series database designed to handle high write and query loads. It is an integral component of the TICK stack."
+image: influxdb:latest
+
+variables:
+  - name: INFLUXDB_DATA_PATH
+    label: "InfluxDB Data Path"
+    type: path
+    default: "/var/lib/influxdb2"
+    description: "The host path to store InfluxDB's data."
+  - name: INFLUXDB_CONFIG_PATH
+    label: "InfluxDB Config Path"
+    type: path
+    default: "/etc/influxdb2"
+    description: "The host path to store InfluxDB's configuration."
+  - name: DOCKER_INFLUXDB_INIT_MODE
+    label: "Init Mode"
+    type: string
+    default: "setup"
+    description: "The initialization mode. Use 'setup' for the initial setup."
+  - name: DOCKER_INFLUXDB_INIT_USERNAME
+    label: "Username"
+    type: string
+    default: "admin"
+    description: "The username for the initial user."
+  - name: DOCKER_INFLUXDB_INIT_PASSWORD
+    label: "Password"
+    type: string
+    default: "changeme"
+    description: "The password for the initial user. CHANGE THIS."
+  - name: DOCKER_INFLUXDB_INIT_ORG
+    label: "Organization"
+    type: string
+    default: "my-org"
+    description: "The name of the initial organization."
+  - name: DOCKER_INFLUXDB_INIT_BUCKET
+    label: "Bucket"
+    type: string
+    default: "my-bucket"
+    description: "The name of the initial bucket."
+
+ports:
+  - name: "API"
+    host: 8086
+    container: 8086
+    protocol: "tcp"
+    description: "The port for the InfluxDB API and web interface."

@@ -1,1 +1,17 @@
 name: dozzle
+description: "Dozzle is a real-time log viewer for docker containers."
+image: amir20/dozzle:latest
+
+variables:
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host."
+
+ports:
+  - name: "Web"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port to access the Dozzle web interface."

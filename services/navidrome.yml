@@ -1,1 +1,47 @@
 name: navidrome
+description: "Navidrome is an open source web-based music collection server and streamer. It gives you freedom to listen to your music collection from any browser or mobile device."
+image: deluan/navidrome:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: ND_LOGLEVEL
+    label: "Log Level"
+    type: string
+    default: "info"
+    description: "The log level for Navidrome (e.g., info, debug, trace)."
+  - name: ND_SCANSCHEDULE
+    label: "Scan Schedule"
+    type: string
+    default: "1h"
+    description: "How often to scan the music library (e.g., 1h, 30m, @daily)."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store Navidrome's data."
+  - name: MUSIC_PATH
+    label: "Music Path"
+    type: path
+    default: "/music"
+    description: "The host path to your music library."
+
+ports:
+  - name: "WebUI"
+    host: 4533
+    container: 4533
+    protocol: "tcp"
+    description: "The port for the Navidrome web interface."

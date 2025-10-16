@@ -1,1 +1,14 @@
 name: pytorch
+description: "PyTorch is an open source machine learning framework that accelerates the path from research prototyping to production deployment."
+image: pytorch/pytorch:latest
+
+variables:
+  - name: APP_PATH
+    label: "Application Path"
+    type: path
+    default: "/workspace"
+    description: "The host path containing your PyTorch application code."
+
+# This is a base image for developing and running PyTorch applications.
+# For GPU support, you will need to use a different image tag (e.g., pytorch/pytorch:1.13.1-cuda11.6-cudnn8-runtime)
+# and have the NVIDIA Container Toolkit installed.

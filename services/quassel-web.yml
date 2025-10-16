@@ -1,1 +1,37 @@
 name: quassel-web
+description: "A web client for Quassel, a modern, cross-platform, distributed IRC client."
+image: linuxserver/quassel-web:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: QUASSEL_CORE_HOST
+    label: "Quassel Core Host"
+    type: string
+    default: "quassel-core"
+    description: "The hostname of the Quassel Core server."
+  - name: QUASSEL_CORE_PORT
+    label: "Quassel Core Port"
+    type: number
+    default: 4242
+    description: "The port of the Quassel Core server."
+
+ports:
+  - name: "WebUI"
+    host: 6443
+    container: 6443
+    protocol: "tcp"
+    description: "The port for the Quassel web interface."

@@ -1,1 +1,48 @@
 name: tdarr-node
+description: "A node for the Tdarr distributed transcoding system."
+image: haveagitgat/tdarr_node:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: TDARR_NODE_NAME
+    label: "Node Name"
+    type: string
+    default: "MyTdarrNode"
+    description: "The name of the Tdarr node."
+  - name: TDARR_SERVER_IP
+    label: "Server IP"
+    type: string
+    default: "tdarr"
+    description: "The IP address or hostname of the Tdarr server."
+  - name: TDARR_SERVER_PORT
+    label: "Server Port"
+    type: number
+    default: 8266
+    description: "The port of the Tdarr server."
+  - name: MEDIA_PATH
+    label: "Media Path"
+    type: path
+    default: "/media"
+    description: "The host path to your media library."
+  - name: CACHE_PATH
+    label: "Cache Path"
+    type: path
+    default: "/temp"
+    description: "The host path for temporary transcode files."
+
+# This service does not expose any ports by default.
+# It communicates with the Tdarr server on the specified port.

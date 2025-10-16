@@ -1,1 +1,28 @@
 name: cloudflare-ddns
+description: "A Docker container that automatically updates Cloudflare DNS records with your public IP address."
+image: oznu/cloudflare-ddns:latest
+
+variables:
+  - name: API_KEY
+    label: "Cloudflare API Token"
+    type: string
+    default: ""
+    description: "Your Cloudflare API token with Zone.Zone.Read, Zone.DNS.Edit permissions."
+  - name: ZONE
+    label: "Zone"
+    type: string
+    default: "yourdomain.com"
+    description: "The Cloudflare zone (domain) you want to update."
+  - name: SUBDOMAIN
+    label: "Subdomain"
+    type: string
+    default: ""
+    description: "The subdomain to update. Leave empty or use '@' for the root domain."
+  - name: PROXIED
+    label: "Proxied"
+    type: boolean
+    default: true
+    description: "Whether to proxy traffic through Cloudflare (orange cloud)."
+
+# This service does not expose any ports.
+# It runs in the background and updates Cloudflare DNS records periodically.

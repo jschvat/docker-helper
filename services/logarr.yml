@@ -1,1 +1,40 @@
 name: logarr
+description: "Logarr is a self-hosted, single-page, log consolidation tool."
+image: monitorr/logarr:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/app/assets/config"
+    description: "The host path to store Logarr's configuration."
+  - name: LOG_PATH
+    label: "Log Path"
+    type: path
+    default: "/var/log/logarrlogs"
+    description: "The host path to the log files that Logarr should monitor."
+
+ports:
+  - name: "WebUI"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Logarr web interface."
+
+# Note: The monitorr/logarr image has not been updated in a while.
+# You will need to edit the config.php file in your CONFIG_PATH to specify the logs to display.

@@ -1,1 +1,37 @@
 name: znc
+description: "ZNC is an IRC network bouncer or BNC. It can detach the client from the actual IRC server, and also from selected channels."
+image: linuxserver/znc:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "Host path for ZNC configuration files."
+
+ports:
+  - name: "IRC"
+    host: 6667
+    container: 6667
+    protocol: "tcp"
+    description: "The port for IRC clients to connect to."
+  - name: "WebUI"
+    host: 6501
+    container: 6501
+    protocol: "tcp"
+    description: "The port for the ZNC web interface."

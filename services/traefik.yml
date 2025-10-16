@@ -1,1 +1,32 @@
 name: traefik
+description: "Traefik is a modern HTTP reverse proxy and load balancer that makes deploying microservices easy."
+image: traefik:latest
+
+variables:
+  - name: TRAEFIK_CONFIG_PATH
+    label: "Traefik Config Path"
+    type: path
+    default: "/etc/traefik"
+    description: "The host path to store Traefik's configuration files."
+  - name: DOCKER_SOCKET_PATH
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    description: "The path to the Docker socket on the host."
+
+ports:
+  - name: "HTTP"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for HTTP traffic."
+  - name: "HTTPS"
+    host: 443
+    container: 443
+    protocol: "tcp"
+    description: "The port for HTTPS traffic."
+  - name: "Dashboard"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the Traefik dashboard."

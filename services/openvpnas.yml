@@ -1,1 +1,49 @@
 name: openvpnas
+description: "OpenVPN Access Server is a full featured, web-based VPN server that provides a simple to use, yet powerful, VPN solution."
+image: linuxserver/openvpn-as:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: INTERFACE
+    label: "Interface"
+    type: string
+    default: "eth0"
+    description: "The network interface to use for the VPN server."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store OpenVPN Access Server's configuration."
+
+ports:
+  - name: "WebUI"
+    host: 943
+    container: 943
+    protocol: "tcp"
+    description: "The port for the OpenVPN Access Server web interface."
+  - name: "OpenVPN"
+    host: 1194
+    container: 1194
+    protocol: "udp"
+    description: "The port for OpenVPN clients to connect to."
+  - name: "WebUI-TCP"
+    host: 9443
+    container: 9443
+    protocol: "tcp"
+    description: "The port for the OpenVPN Access Server web interface (TCP)."
+
+# Note: The default username is 'openvpn'. The password will be printed to the container logs on the first run.

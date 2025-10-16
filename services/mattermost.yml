@@ -1,1 +1,37 @@
 name: mattermost
+description: "Mattermost is an open source, self-hostable online chat service with file sharing, search, and integrations. It is designed as an internal chat for organisations and companies, and mostly markets itself as an open-source alternative to Slack and Microsoft Teams."
+image: mattermost/mattermost-team-edition:latest
+
+variables:
+  - name: MM_USERNAME
+    label: "Database User"
+    type: string
+    default: "mmuser"
+    description: "The username for the Mattermost database."
+  - name: MM_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "mmuser_password"
+    description: "The password for the Mattermost database user. CHANGE THIS."
+  - name: MM_DBNAME
+    label: "Database Name"
+    type: string
+    default: "mattermost"
+    description: "The name of the Mattermost database."
+  - name: MM_SQLSETTINGS_DATASOURCE
+    label: "Database Datasource"
+    type: string
+    default: "postgres://mmuser:mmuser_password@db:5432/mattermost?sslmode=disable&connect_timeout=10"
+    description: "The connection string for the database. Replace the user, password, and db name if you changed them."
+
+ports:
+  - name: "WebUI"
+    host: 8065
+    container: 8065
+    protocol: "tcp"
+    description: "The port for the Mattermost web interface."
+
+# Note: Mattermost requires a PostgreSQL or MySQL database.
+# You will need to set up a separate database service (e.g., postgresql)
+# and configure the MM_* variables accordingly.
+# You also need to set the domain in the .env file of the official mattermost docker setup.

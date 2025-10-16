@@ -1,1 +1,35 @@
 name: mosquitto
+description: "Eclipse Mosquitto is an open source message broker that implements the MQTT protocol."
+image: eclipse-mosquitto:latest
+
+variables:
+  - name: MOSQUITTO_CONFIG_PATH
+    label: "Mosquitto Config Path"
+    type: path
+    default: "/mosquitto/config"
+    description: "The host path to store Mosquitto's configuration file."
+  - name: MOSQUITTO_DATA_PATH
+    label: "Mosquitto Data Path"
+    type: path
+    default: "/mosquitto/data"
+    description: "The host path to store Mosquitto's data."
+  - name: MOSQUITTO_LOG_PATH
+    label: "Mosquitto Log Path"
+    type: path
+    default: "/mosquitto/log"
+    description: "The host path to store Mosquitto's logs."
+
+ports:
+  - name: "MQTT"
+    host: 1883
+    container: 1883
+    protocol: "tcp"
+    description: "The port for MQTT communication."
+  - name: "MQTT-Websockets"
+    host: 9001
+    container: 9001
+    protocol: "tcp"
+    description: "The port for MQTT over Websockets."
+
+# Note: You need to create a mosquitto.conf file in your MOSQUITTO_CONFIG_PATH.
+# See the Mosquitto documentation for configuration options.

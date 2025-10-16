@@ -1,1 +1,37 @@
 name: musicbrainz-picard
+description: "MusicBrainz Picard is a cross-platform music tagger written in Python."
+image: linuxserver/musicbrainz-picard:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store MusicBrainz Picard's configuration."
+  - name: MUSIC_PATH
+    label: "Music Path"
+    type: path
+    default: "/music"
+    description: "The host path to your music library."
+
+ports:
+  - name: "WebUI"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port for the MusicBrainz Picard web interface."

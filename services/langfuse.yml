@@ -1,1 +1,42 @@
 name: langfuse
+description: "Langfuse is an open source LLM engineering platform. It provides observability, metrics, evaluation, and prompt management for LLM applications."
+image: langfuse/langfuse:latest
+
+variables:
+  - name: DATABASE_URL
+    label: "Database URL"
+    type: string
+    default: "postgresql://user:password@host:port/database"
+    description: "The connection string for the PostgreSQL database."
+  - name: NEXTAUTH_SECRET
+    label: "NextAuth Secret"
+    type: string
+    default: "changeme"
+    description: "A secret for NextAuth. Generate a random one. CHANGE THIS."
+  - name: LANGFUSE_SECRET_KEY
+    label: "Langfuse Secret Key"
+    type: string
+    default: "changeme"
+    description: "A secret key for Langfuse. Generate a random one. CHANGE THIS."
+  - name: LANGFUSE_PUBLIC_KEY
+    label: "Langfuse Public Key"
+    type: string
+    default: "changeme"
+    description: "A public key for Langfuse. Generate a random one. CHANGE THIS."
+  - name: LANGFUSE_HOST
+    label: "Langfuse Host"
+    type: string
+    default: "http://localhost:3000"
+    description: "The host where Langfuse will be accessible."
+
+ports:
+  - name: "WebUI"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port for the Langfuse web interface."
+
+# Note: Langfuse requires a PostgreSQL database.
+# You will need to set up a separate database service (e.g., postgresql)
+# and configure the DATABASE_URL variable accordingly.
+# You also need to generate secure random strings for the secret and public keys.

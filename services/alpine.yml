@@ -1,1 +1,5 @@
 name: alpine
+description: "Alpine Linux is a lightweight, security-oriented Linux distribution that is commonly used as a base image for Docker containers due to its small footprint."
+image: alpine:latest
+# This is a base image, so no default variables or ports are defined.
+# You can add them here if your specific use case requires them.

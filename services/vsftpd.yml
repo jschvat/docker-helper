@@ -1,1 +1,57 @@
 name: vsftpd
+description: "vsftpd is a GPL licensed FTP server for UNIX-like systems, including Linux."
+image: fauria/vsftpd:latest
+
+variables:
+  - name: FTP_USER
+    label: "FTP User"
+    type: string
+    default: "myuser"
+    description: "The username for the FTP user."
+  - name: FTP_PASS
+    label: "FTP Password"
+    type: string
+    default: "mypassword"
+    description: "The password for the FTP user. CHANGE THIS."
+  - name: PASV_ENABLE
+    label: "Enable Passive Mode"
+    type: boolean
+    default: true
+    description: "Enable passive mode for FTP."
+  - name: PASV_MIN_PORT
+    label: "Passive Mode Min Port"
+    type: number
+    default: 21100
+    description: "The minimum port for passive mode."
+  - name: PASV_MAX_PORT
+    label: "Passive Mode Max Port"
+    type: number
+    default: 21110
+    description: "The maximum port for passive mode."
+  - name: PASV_ADDRESS
+    label: "Passive Address"
+    type: string
+    default: "127.0.0.1"
+    description: "The public IP address of the host."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/home/vsftpd"
+    description: "The host path to the FTP user's home directory."
+
+ports:
+  - name: "FTP_20"
+    host: 20
+    container: 20
+    protocol: "tcp"
+    description: "FTP data port."
+  - name: "FTP_21"
+    host: 21
+    container: 21
+    protocol: "tcp"
+    description: "FTP control port."
+  - name: "PassivePorts"
+    host: "21100-21110"
+    container: "21100-21110"
+    protocol: "tcp"
+    description: "The port range for passive mode."

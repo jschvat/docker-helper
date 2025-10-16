@@ -1,1 +1,39 @@
 name: minecraft-bedrock-server
+description: "A dedicated server for Minecraft Bedrock Edition."
+image: itzg/minecraft-bedrock-server:latest
+
+variables:
+  - name: EULA
+    label: "Accept EULA"
+    type: boolean
+    default: false
+    description: "You must accept the Minecraft End User License Agreement to run the server. Set to true to accept."
+  - name: GAMEMODE
+    label: "Game Mode"
+    type: string
+    default: "survival"
+    description: "The game mode for the server (e.g., survival, creative, adventure)."
+  - name: DIFFICULTY
+    label: "Difficulty"
+    type: string
+    default: "easy"
+    description: "The difficulty for the server (e.g., peaceful, easy, normal, hard)."
+  - name: LEVEL_SEED
+    label: "Level Seed"
+    type: string
+    default: ""
+    description: "(Optional) The seed for generating the world."
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store the server's data, including worlds and configuration."
+
+ports:
+  - name: "Game"
+    host: 19132
+    container: 19132
+    protocol: "udp"
+    description: "The port for Minecraft clients to connect to."
+
+# Note: You must set EULA to true to run the server.

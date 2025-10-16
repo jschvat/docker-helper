@@ -1,1 +1,36 @@
 name: gitlab
+description: "GitLab is a complete DevOps platform, delivered as a single application, that allows you to manage, build, and deploy your code."
+image: gitlab/gitlab-ce:latest
+
+variables:
+  - name: GITLAB_HOST
+    label: "GitLab Hostname"
+    type: string
+    default: "gitlab.yourdomain.com"
+    description: "The hostname for your GitLab instance."
+  - name: GITLAB_OMNIBUS_CONFIG
+    label: "GitLab Omnibus Config"
+    type: string
+    default: ""
+    description: "A semicolon-separated list of GitLab configuration settings. For example, to set the external URL and enable the container registry: external_url 'https://gitlab.yourdomain.com'; registry_external_url 'https://registry.yourdomain.com';"
+
+ports:
+  - name: "HTTP"
+    host: 80
+    container: 80
+    protocol: "tcp"
+    description: "The port for HTTP access to GitLab."
+  - name: "HTTPS"
+    host: 443
+    container: 443
+    protocol: "tcp"
+    description: "The port for HTTPS access to GitLab."
+  - name: "SSH"
+    host: 2222
+    container: 22
+    protocol: "tcp"
+    description: "The port for SSH access to GitLab."
+
+# Note: GitLab is a large application with significant resource requirements.
+# It is highly recommended to consult the official GitLab Docker documentation for detailed configuration instructions.
+# https://docs.gitlab.com/ee/install/docker.html

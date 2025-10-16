@@ -1,1 +1,27 @@
 name: searxng
+description: "SearXNG is a free internet metasearch engine which aggregates results from more than 70 search services. Users are neither tracked nor profiled."
+image: searxng/searxng:latest
+
+variables:
+  - name: SEARXNG_BASE_URL
+    label: "Base URL"
+    type: string
+    default: "https://searxng.example.com"
+    description: "The base URL of your SearXNG instance."
+  - name: SEARXNG_SECRET_KEY
+    label: "Secret Key"
+    type: string
+    default: "changeme"
+    description: "A secret key for your SearXNG instance. Generate a random one. CHANGE THIS."
+  - name: SEARXNG_CONFIG_PATH
+    label: "SearXNG Config Path"
+    type: path
+    default: "/etc/searxng"
+    description: "The host path to store SearXNG's configuration files."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the SearXNG web interface."

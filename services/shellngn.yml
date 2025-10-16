@@ -1,1 +1,22 @@
 name: shellngn
+description: "Shellngn is a web-based, self-hosted client for SSH, SFTP, Telnet, RDP, and VNC."
+image: shellngn/pro:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/home/node/server/data"
+    description: "The host path to store Shellngn's data."
+  - name: HOST
+    label: "Host"
+    type: string
+    default: "0.0.0.0"
+    description: "The host that Shellngn will listen on."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for the Shellngn web interface."

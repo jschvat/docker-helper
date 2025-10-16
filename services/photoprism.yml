@@ -1,1 +1,66 @@
 name: photoprism
+description: "PhotoPrism is a server-based application for browsing, organizing and sharing your personal photo collection."
+image: photoprism/photoprism:latest
+
+variables:
+  - name: PHOTOPRISM_ADMIN_USER
+    label: "Admin User"
+    type: string
+    default: "admin"
+    description: "The username for the PhotoPrism admin account."
+  - name: PHOTOPRISM_ADMIN_PASSWORD
+    label: "Admin Password"
+    type: string
+    default: "changeme"
+    description: "The password for the PhotoPrism admin account. CHANGE THIS."
+  - name: PHOTOPRISM_DATABASE_DRIVER
+    label: "Database Driver"
+    type: string
+    default: "mysql"
+    description: "The database driver to use (mysql or sqlite)."
+  - name: PHOTOPRISM_DATABASE_SERVER
+    label: "Database Server"
+    type: string
+    default: "photoprism_db:3306"
+    description: "The hostname and port of the database server."
+  - name: PHOTOPRISM_DATABASE_NAME
+    label: "Database Name"
+    type: string
+    default: "photoprism"
+    description: "The name of the PhotoPrism database."
+  - name: PHOTOPRISM_DATABASE_USER
+    label: "Database User"
+    type: string
+    default: "photoprism"
+    description: "The username for the database connection."
+  - name: PHOTOPRISM_DATABASE_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: PHOTOPRISM_ORIGINALS_PATH
+    label: "Originals Path"
+    type: path
+    default: "/photoprism/originals"
+    description: "The host path to your photo library."
+  - name: PHOTOPRISM_STORAGE_PATH
+    label: "Storage Path"
+    type: path
+    default: "/photoprism/storage"
+    description: "The host path to store PhotoPrism's data."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+
+ports:
+  - name: "WebUI"
+    host: 2342
+    container: 2342
+    protocol: "tcp"
+    description: "The port for the PhotoPrism web interface."
+
+# Note: PhotoPrism requires a MariaDB/MySQL database for production use.
+# You will need to set up a separate database service (e.g., mariadb)
+# and configure the PHOTOPRISM_DATABASE_* variables accordingly.

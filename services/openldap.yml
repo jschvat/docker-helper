@@ -1,1 +1,45 @@
 name: openldap
+description: "An OpenLDAP server for providing authentication services."
+image: osixia/openldap:latest
+
+variables:
+  - name: LDAP_ORGANISATION
+    label: "LDAP Organisation"
+    type: string
+    default: "example"
+    description: "The name of your organisation."
+  - name: LDAP_DOMAIN
+    label: "LDAP Domain"
+    type: string
+    default: "example.org"
+    description: "The domain for your LDAP server."
+  - name: LDAP_ADMIN_PASSWORD
+    label: "Admin Password"
+    type: string
+    default: "admin"
+    description: "The password for the LDAP admin user."
+  - name: LDAP_DATA_PATH
+    label: "LDAP Data Path"
+    type: path
+    default: "/var/lib/ldap"
+    description: "The host path to store the LDAP database."
+  - name: LDAP_CONFIG_PATH
+    label: "LDAP Config Path"
+    type: path
+    default: "/etc/ldap/slapd.d"
+    description: "The host path to store the LDAP configuration."
+
+ports:
+  - name: "LDAP"
+    host: 389
+    container: 389
+    protocol: "tcp"
+    description: "The port for LDAP communication."
+  - name: "LDAPS"
+    host: 636
+    container: 636
+    protocol: "tcp"
+    description: "The port for LDAPS (LDAP over SSL) communication."
+
+# Note: The osixia/openldap image has not been updated in a while.
+# For production use, you may want to consider a different image or approach.

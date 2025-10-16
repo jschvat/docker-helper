@@ -1,1 +1,25 @@
 name: litellm
+description: "LiteLLM is a lightweight library to simplify LLM completion calls. It manages provider-specific inputs/outputs and offers a consistent interface."
+image: ghcr.io/berriai/litellm:main-stable
+
+variables:
+  - name: LITELLM_CONFIG_PATH
+    label: "LiteLLM Config Path"
+    type: path
+    default: "/app/config.yaml"
+    description: "The host path to your LiteLLM config.yaml file."
+  - name: LITELLM_MASTER_KEY
+    label: "Master Key"
+    type: string
+    default: "changeme"
+    description: "A master key for securing the LiteLLM proxy. CHANGE THIS."
+
+ports:
+  - name: "API"
+    host: 4000
+    container: 4000
+    protocol: "tcp"
+    description: "The port for the LiteLLM API."
+
+# Note: You need to create a config.yaml file and mount it to the path specified in LITELLM_CONFIG_PATH.
+# This file contains your model and API key configurations.

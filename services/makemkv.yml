@@ -1,1 +1,50 @@
 name: makemkv
+description: "MakeMKV is a one-click solution to convert video that you own into a free and patents-unencumbered format that can be played everywhere."
+image: jlesage/makemkv:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: MAKEMKV_KEY
+    label: "MakeMKV Beta Key"
+    type: string
+    default: "BETA"
+    description: "Set to BETA to automatically fetch the latest beta key."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store MakeMKV's configuration."
+  - name: STORAGE_PATH
+    label: "Storage Path"
+    type: path
+    default: "/storage"
+    description: "The host path to your media library (for ISOs)."
+  - name: OUTPUT_PATH
+    label: "Output Path"
+    type: path
+    default: "/output"
+    description: "The host path where ripped files will be stored."
+
+ports:
+  - name: "WebUI"
+    host: 5800
+    container: 5800
+    protocol: "tcp"
+    description: "The port for the MakeMKV web interface."
+
+# Note: To rip from a physical drive, you need to pass the device to the container.
+# For example: --device /dev/sr0

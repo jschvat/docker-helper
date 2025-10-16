@@ -1,1 +1,27 @@
 name: pgadmin
+description: "pgAdmin is a feature-rich open source administration and development platform for PostgreSQL."
+image: dpage/pgadmin4:latest
+
+variables:
+  - name: PGADMIN_DEFAULT_EMAIL
+    label: "Default Email"
+    type: string
+    default: "admin@example.com"
+    description: "The email address to use for the default pgAdmin user."
+  - name: PGADMIN_DEFAULT_PASSWORD
+    label: "Default Password"
+    type: string
+    default: "admin"
+    description: "The password for the default pgAdmin user. CHANGE THIS."
+  - name: PGADMIN_DATA_PATH
+    label: "pgAdmin Data Path"
+    type: path
+    default: "/var/lib/pgadmin"
+    description: "The host path to store pgAdmin's data."
+
+ports:
+  - name: "WebUI"
+    host: 5050
+    container: 80
+    protocol: "tcp"
+    description: "The port for the pgAdmin web interface."

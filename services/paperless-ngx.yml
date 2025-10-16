@@ -1,1 +1,70 @@
 name: paperless-ngx
+description: "Paperless-ngx is a document management system that transforms your physical documents into a searchable online archive so you can keep, well, less paper."
+image: ghcr.io/paperless-ngx/paperless-ngx:latest
+
+variables:
+  - name: PAPERLESS_REDIS
+    label: "Redis URL"
+    type: string
+    default: "redis://redis:6379"
+    description: "The URL of the Redis server."
+  - name: PAPERLESS_DBENGINE
+    label: "Database Engine"
+    type: string
+    default: "postgresql"
+    description: "The database engine to use (postgresql or sqlite)."
+  - name: PAPERLESS_DBHOST
+    label: "Database Host"
+    type: string
+    default: "paperless_db"
+    description: "The hostname of the database server."
+  - name: PAPERLESS_DBPORT
+    label: "Database Port"
+    type: number
+    default: 5432
+    description: "The port of the database server."
+  - name: PAPERLESS_DBUSER
+    label: "Database User"
+    type: string
+    default: "paperless"
+    description: "The username for the database connection."
+  - name: PAPERLESS_DBPASS
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection. CHANGE THIS."
+  - name: PAPERLESS_DBNAME
+    label: "Database Name"
+    type: string
+    default: "paperless"
+    description: "The name of the database to use."
+  - name: PAPERLESS_CONSUMPTION_DIR
+    label: "Consumption Directory"
+    type: path
+    default: "/usr/src/paperless/consume"
+    description: "The host path where Paperless-ngx will look for new documents."
+  - name: PAPERLESS_MEDIA_ROOT
+    label: "Media Root"
+    type: path
+    default: "/usr/src/paperless/media"
+    description: "The host path where Paperless-ngx will store its media files."
+  - name: PAPERLESS_DATA_DIR
+    label: "Data Directory"
+    type: path
+    default: "/usr/src/paperless/data"
+    description: "The host path where Paperless-ngx will store its data."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+
+ports:
+  - name: "WebUI"
+    host: 8000
+    container: 8000
+    protocol: "tcp"
+    description: "The port for the Paperless-ngx web interface."
+
+# Note: Paperless-ngx requires a PostgreSQL database and a Redis instance.
+# You will need to set up separate services for these and configure the variables accordingly.

@@ -1,1 +1,27 @@
 name: flowise
+description: "Flowise is a UI for building LangChain apps. It provides a drag-and-drop interface to create and visualize language model chains."
+image: flowiseai/flowise:latest
+
+variables:
+  - name: PORT
+    label: "Port"
+    type: number
+    default: 3000
+    description: "The port that Flowise will listen on."
+  - name: FLOWISE_USERNAME
+    label: "Username"
+    type: string
+    default: ""
+    description: "An optional username for basic authentication."
+  - name: FLOWISE_PASSWORD
+    label: "Password"
+    type: string
+    default: ""
+    description: "An optional password for basic authentication."
+
+ports:
+  - name: "WebUI"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port for the Flowise Web UI."

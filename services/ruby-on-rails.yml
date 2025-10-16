@@ -1,1 +1,20 @@
 name: ruby-on-rails
+description: "A base image for running Ruby on Rails applications."
+image: ruby:latest
+
+variables:
+  - name: APP_PATH
+    label: "Application Path"
+    type: path
+    default: "/usr/src/app"
+    description: "The host path containing your Ruby on Rails application code."
+
+ports:
+  - name: "Web"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port your Ruby on Rails application listens on."
+
+# Note: You will need to have a Gemfile in your APP_PATH.
+# The container will automatically run 'bundle install' and then 'rails server -b 0.0.0.0'.

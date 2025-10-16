@@ -1,1 +1,38 @@
 name: pgbackup
+description: "A Docker container that performs periodic backups of a PostgreSQL database."
+image: prodrigestivill/postgres-backup-local:latest
+
+variables:
+  - name: POSTGRES_HOST
+    label: "PostgreSQL Host"
+    type: string
+    default: "postgres"
+    description: "The hostname of the PostgreSQL server to back up."
+  - name: POSTGRES_DB
+    label: "PostgreSQL Database"
+    type: string
+    default: "postgres"
+    description: "The name of the database to back up."
+  - name: POSTGRES_USER
+    label: "PostgreSQL User"
+    type: string
+    default: "postgres"
+    description: "The username for the database connection."
+  - name: POSTGRES_PASSWORD
+    label: "PostgreSQL Password"
+    type: string
+    default: "changeme"
+    description: "The password for the database connection."
+  - name: BACKUP_DIR
+    label: "Backup Directory"
+    type: path
+    default: "/backups"
+    description: "The host path where the backup files will be stored."
+  - name: SCHEDULE
+    label: "Schedule"
+    type: string
+    default: "@daily"
+    description: "The schedule for the backup, in cron format (e.g., @daily, @weekly, 0 0 * * *)."
+
+# This service does not expose any ports.
+# It runs in the background and performs backups according to the schedule.
