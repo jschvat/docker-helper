@@ -1,0 +1,47 @@
+name: audiobookshelf
+description: "A self-hosted audiobook and podcast server."
+image: ghcr.io/advplyr/audiobookshelf:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: AUDIOBOOKS_PATH
+    label: "Audiobooks Path"
+    type: path
+    default: "/audiobooks"
+    description: "The host path to your audiobook library."
+  - name: PODCASTS_PATH
+    label: "Podcasts Path"
+    type: path
+    default: "/podcasts"
+    description: "The host path to your podcast library."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Audiobookshelf's configuration."
+  - name: METADATA_PATH
+    label: "Metadata Path"
+    type: path
+    default: "/metadata"
+    description: "The host path to store Audiobookshelf's metadata."
+
+ports:
+  - name: "WebUI"
+    host: 13378
+    container: 80
+    protocol: "tcp"
+    description: "The port for the Audiobookshelf web interface."

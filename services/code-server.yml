@@ -1,0 +1,42 @@
+name: code-server
+description: "Run VS Code on any machine, anywhere, and access it in the browser."
+image: linuxserver/code-server:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "Etc/UTC"
+    description: "The timezone for the container, e.g., America/New_York."
+  - name: PASSWORD
+    label: "Password"
+    type: string
+    default: "password"
+    description: "The password to access the web UI. CHANGE THIS."
+  - name: SUDO_PASSWORD
+    label: "Sudo Password"
+    type: string
+    default: "password"
+    description: "The sudo password for the user. CHANGE THIS."
+  - name: CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/config"
+    description: "The host path to store Code-Server's configuration."
+
+ports:
+  - name: "WebUI"
+    host: 8443
+    container: 8443
+    protocol: "tcp"
+    description: "The port for the Code-Server web interface."

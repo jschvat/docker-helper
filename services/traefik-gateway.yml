@@ -1,0 +1,55 @@
+name: traefik-gateway
+description: "Traefik reverse proxy and load balancer - automatically discovers Docker containers and routes LAN traffic to them. Perfect for bridging LAN to Docker networks with automatic service discovery."
+image: traefik:latest
+
+variables:
+  - name: TRAEFIK_CONFIG_DIR
+    label: "Traefik Config Directory"
+    type: directory
+    default: "/etc/traefik-config"
+    container_path: "/etc/traefik"
+    description: "Directory for traefik.yml and dynamic configuration files"
+
+  - name: TRAEFIK_LOG_LEVEL
+    label: "Log Level"
+    type: string
+    default: "INFO"
+    description: "Logging level: DEBUG, INFO, WARN, ERROR"
+
+  - name: TRAEFIK_DASHBOARD
+    label: "Enable Dashboard"
+    type: boolean
+    default: true
+    description: "Enable the Traefik web dashboard for monitoring and configuration"
+
+  - name: DOCKER_NETWORK
+    label: "Docker Network to Monitor"
+    type: string
+    default: ""
+    description: "Specific Docker network to monitor (leave empty to monitor all networks)"
+
+  - name: DOCKER_SOCKET
+    label: "Docker Socket Path"
+    type: path
+    default: "/var/run/docker.sock"
+    container_path: "/var/run/docker.sock"
+    description: "Path to Docker socket for container discovery (read-only mount)"
+
+ports:
+  - name: HTTP
+    host: 80
+    container: 80
+    protocol: tcp
+    description: "HTTP entrypoint - main port for LAN access to containers"
+
+  - name: HTTPS
+    host: 443
+    container: 443
+    protocol: tcp
+    description: "HTTPS entrypoint - secure access with automatic ACME/Let's Encrypt support"
+
+  - name: DASHBOARD
+    host: 8080
+    container: 8080
+    protocol: tcp
+    description: "Traefik dashboard and API port"

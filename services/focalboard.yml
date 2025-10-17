@@ -1,0 +1,17 @@
+name: focalboard
+description: "Focalboard is an open source, self-hosted project management tool that's an alternative to Trello, Notion, and Asana."
+image: mattermost/focalboard:latest
+
+variables:
+  - name: DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store Focalboard's data."
+
+ports:
+  - name: "WebUI"
+    host: 8000
+    container: 8000
+    protocol: "tcp"
+    description: "The port for the Focalboard web interface."

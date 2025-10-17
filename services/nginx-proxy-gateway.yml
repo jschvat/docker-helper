@@ -1,0 +1,36 @@
+name: nginx-proxy-gateway
+description: "Nginx reverse proxy gateway to bridge LAN traffic to Docker containers on separate networks. Acts as a network gateway allowing access to containers on isolated Docker networks."
+image: nginx:alpine
+
+variables:
+  - name: NGINX_CONFIG_DIR
+    label: "Nginx Config Directory"
+    type: directory
+    default: "/etc/nginx-proxy"
+    container_path: "/etc/nginx/conf.d"
+    description: "Directory containing nginx proxy configuration files (create upstream.conf here)"
+
+  - name: DOCKER_NETWORK
+    label: "Docker Network to Bridge"
+    type: string
+    default: "bridge"
+    description: "Name of the Docker network to connect to (e.g., 'myapp_network'). The proxy will join this network to reach containers."
+
+  - name: PROXY_BUFFER_SIZE
+    label: "Proxy Buffer Size"
+    type: string
+    default: "16k"
+    description: "Buffer size for proxied requests (nginx proxy_buffer_size)"
+
+ports:
+  - name: HTTP
+    host: 8080
+    container: 80
+    protocol: tcp
+    description: "HTTP port for proxy gateway (LAN devices connect here)"
+
+  - name: HTTPS
+    host: 8443
+    container: 443
+    protocol: tcp
+    description: "HTTPS port for secure proxy gateway (optional, requires SSL configuration)"

@@ -1,0 +1,46 @@
+name: outline
+description: "A modern team knowledge base that is open source and self-hostable."
+image: outline/outline:latest
+
+variables:
+  - name: SECRET_KEY
+    label: "Secret Key"
+    type: string
+    default: "changeme"
+    description: "A secret key for your Outline instance. Generate a random one. CHANGE THIS."
+  - name: UTILS_SECRET
+    label: "Utils Secret"
+    type: string
+    default: "changeme"
+    description: "A secret for utility functions. Generate a random one. CHANGE THIS."
+  - name: URL
+    label: "URL"
+    type: string
+    default: "http://localhost:3000"
+    description: "The public URL where your Outline instance will be accessible."
+  - name: DATABASE_URL
+    label: "Database URL"
+    type: string
+    default: "postgres://user:password@host:port/database"
+    description: "The connection string for the PostgreSQL database."
+  - name: REDIS_URL
+    label: "Redis URL"
+    type: string
+    default: "redis://redis:6379"
+    description: "The URL of the Redis server."
+  - name: FILE_STORAGE
+    label: "File Storage"
+    type: string
+    default: "local"
+    description: "The file storage backend to use (local or s3)."
+
+ports:
+  - name: "WebUI"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port for the Outline web interface."
+
+# Note: Outline is a multi-container application that requires a PostgreSQL database, Redis, and an OIDC provider.
+# For a full installation, it is recommended to use the official Docker Compose file:
+# https://github.com/outline/outline/blob/main/docker-compose.yml
