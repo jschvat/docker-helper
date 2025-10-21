@@ -1,0 +1,47 @@
+name: cassandra
+description: "Apache Cassandra is a free and open-source, distributed, wide-column store, NoSQL database management system designed to handle large amounts of data across many commodity servers."
+image: cassandra:latest
+
+variables:
+  - name: CASSANDRA_CLUSTER_NAME
+    label: "Cluster Name"
+    type: string
+    default: "Test Cluster"
+    description: "The name of the Cassandra cluster."
+  - name: CASSANDRA_DC
+    label: "Data Center"
+    type: string
+    default: "dc1"
+    description: "The data center name for this node."
+  - name: CASSANDRA_RACK
+    label: "Rack"
+    type: string
+    default: "rack1"
+    description: "The rack name for this node."
+  - name: CASSANDRA_ENDPOINT_SNITCH
+    label: "Endpoint Snitch"
+    type: string
+    default: "GossipingPropertyFileSnitch"
+    description: "The snitch class to use for network topology."
+  - name: CASSANDRA_DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/var/lib/cassandra"
+    description: "The host path to store Cassandra's data."
+
+ports:
+  - name: "CQL"
+    host: 9042
+    container: 9042
+    protocol: "tcp"
+    description: "The port for CQL native transport (client connections)."
+  - name: "Thrift"
+    host: 9160
+    container: 9160
+    protocol: "tcp"
+    description: "The port for Thrift client API (legacy)."
+  - name: "JMX"
+    host: 7199
+    container: 7199
+    protocol: "tcp"
+    description: "The port for JMX monitoring."

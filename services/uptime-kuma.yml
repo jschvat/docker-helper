@@ -1,17 +1,24 @@
 name: uptime-kuma
-description: "Uptime Kuma is a fancy self-hosted monitoring tool."
+description: "A fancy self-hosted monitoring tool with a modern UI. Monitor HTTP(s), TCP, HTTP(s) Keyword, HTTP(s) Json Query, Ping, DNS Record, Push, Steam Game Server and Docker Containers."
 image: louislam/uptime-kuma:latest
 
 variables:
-  - name: DATA_PATH
-    label: "Data Path"
-    type: path
-    default: "/app/data"
-    description: "The host path to store Uptime Kuma's data."
+  - name: UPTIME_KUMA_DATA
+    label: "Data Directory"
+    type: directory
+    default: "/var/lib/uptime-kuma"
+    container_path: "/app/data"
+    description: "Directory to store Uptime Kuma data and configuration"
+
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container (e.g., America/New_York, Europe/London)"
 
 ports:
-  - name: "WebUI"
+  - name: WEB_UI
     host: 3001
     container: 3001
-    protocol: "tcp"
-    description: "The port for the Uptime Kuma web interface."
+    protocol: tcp
+    description: "Web interface for Uptime Kuma"

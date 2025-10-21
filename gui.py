@@ -1,18 +1,28 @@
 import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk, Pango, Gdk
+from gi.repository import Gtk, Pango, Gdk, GLib
 import core
+import config
 import yaml
 import os
+import threading
+import subprocess
+import shutil
 
 class DockerManagerWindow(Gtk.Window):
-    def __init__(self):
+    def __init__(self, docker_host=None):
         Gtk.Window.__init__(self, title="Docker Container Manager")
         self.set_default_size(1400, 900)
         self.set_position(Gtk.WindowPosition.CENTER)
 
+        # If no docker_host specified, try to load the default from config
+        if docker_host is None:
+            docker_host = config.get_default_host()
+
+        self.docker_host = docker_host
+
         try:
-            self.client = core.get_client()
+            self.client = core.get_client(docker_host=docker_host)
         except ConnectionError as e:
             self.show_error_dialog(str(e))
             return
@@ -60,27 +70,60 @@ class DockerManagerWindow(Gtk.Window):
         header_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         header_box.get_style_context().add_class('app-header')
 
+        # Horizontal box for title and connection button
+        header_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        header_hbox.set_margin_start(20)
+        header_hbox.set_margin_end(20)
+        header_hbox.set_margin_top(16)
+        header_hbox.set_margin_bottom(16)
+
         # Title and subtitle
         title_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
-        title_box.set_margin_start(20)
-        title_box.set_margin_end(20)
-        title_box.set_margin_top(16)
-        title_box.set_margin_bottom(16)
 
         title_label = Gtk.Label()
         title_label.set_markup('<span size="x-large" weight="bold">Docker Container Manager</span>')
         title_label.set_xalign(0)
         title_label.get_style_context().add_class('app-title')
 
-        subtitle_label = Gtk.Label()
-        subtitle_label.set_markup('<span size="small">Manage Docker containers and services</span>')
-        subtitle_label.set_xalign(0)
-        subtitle_label.get_style_context().add_class('app-subtitle')
+        subtitle_text = 'Manage Docker containers and services'
+        if self.docker_host:
+            # Show connected host in subtitle
+            subtitle_text = f'Connected to: {self.docker_host}'
+        else:
+            subtitle_text = 'Connected to: Local Docker'
+
+        self.subtitle_label = Gtk.Label()
+        self.subtitle_label.set_markup(f'<span size="small">{subtitle_text}</span>')
+        self.subtitle_label.set_xalign(0)
+        self.subtitle_label.get_style_context().add_class('app-subtitle')
 
         title_box.pack_start(title_label, False, False, 0)
-        title_box.pack_start(subtitle_label, False, False, 0)
+        title_box.pack_start(self.subtitle_label, False, False, 0)
 
-        header_box.pack_start(title_box, False, False, 0)
+        header_hbox.pack_start(title_box, True, True, 0)
+
+        # Connection button
+        connection_button = Gtk.Button()
+        connection_button.set_relief(Gtk.ReliefStyle.NONE)
+        connection_button.get_style_context().add_class('connection-button')
+
+        button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+
+        # Connection icon
+        connection_icon = Gtk.Image.new_from_icon_name("network-server", Gtk.IconSize.BUTTON)
+        button_box.pack_start(connection_icon, False, False, 0)
+
+        # Button label
+        connection_label = Gtk.Label()
+        connection_label.set_markup('<span weight="bold">Connection</span>')
+        button_box.pack_start(connection_label, False, False, 0)
+
+        connection_button.add(button_box)
+        connection_button.connect("clicked", self.on_connection_button_clicked)
+
+        header_hbox.pack_end(connection_button, False, False, 0)
+
+        header_box.pack_start(header_hbox, False, False, 0)
 
         # Add separator
         separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
@@ -252,6 +295,24 @@ class DockerManagerWindow(Gtk.Window):
         spinbutton {
             border-radius: 6px;
         }
+
+        /* Connection Button */
+        .connection-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            padding: 8px 16px;
+            color: white;
+        }
+
+        .connection-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .connection-button label {
+            color: white;
+        }
         """
         css_provider.load_from_data(css)
         screen = Gdk.Screen.get_default()
@@ -310,19 +371,57 @@ class DockerManagerWindow(Gtk.Window):
         self.update_service_list()
 
     def service_filter_func(self, row, data):
-        """Filter services based on search text"""
+        """Filter services based on search text (searches name and description)"""
         search_text = self.service_search_entry.get_text().lower()
         if not search_text:
             return True
 
+        # Get the main hbox from the row
         hbox = row.get_child()
-        label = hbox.get_children()[1]
-        service_name = label.get_label().lower()
-        return search_text in service_name
+        if not hbox:
+            return False
+
+        # The structure is: hbox -> [checkbox, vbox]
+        # vbox contains [name_label, desc_label (optional)]
+        children = hbox.get_children()
+        if len(children) < 2:
+            return False
+
+        vbox = children[1]  # Get the vbox (second child after checkbox)
+        vbox_children = vbox.get_children()
+
+        if not vbox_children:
+            return False
+
+        # Get service name from first label
+        name_label = vbox_children[0]
+        service_name = name_label.get_text().lower()
+
+        # Check if search text is in service name
+        if search_text in service_name:
+            return True
+
+        # Also check description if it exists
+        if len(vbox_children) > 1:
+            desc_label = vbox_children[1]
+            description = desc_label.get_text().lower()
+            if search_text in description:
+                return True
+
+        return False
 
     def on_service_search_changed(self, entry):
         """Handle search text changes"""
         self.service_listbox.invalidate_filter()
+
+        # Update count of visible services
+        search_text = entry.get_text()
+        if search_text:
+            visible_count = 0
+            for row in self.service_listbox.get_children():
+                if row.get_visible():
+                    visible_count += 1
+            # Could add a status label here if desired
 
     def container_filter_func(self, model, iter, data):
         """Filter containers - showing all"""
@@ -1285,15 +1384,10 @@ class DockerManagerWindow(Gtk.Window):
         container.pack_end(button_box, False, True, 0)
 
         commands = [
-            ("Install", "list-add-symbolic", self.on_install_clicked, "success"),
-            ("Uninstall", "list-remove-symbolic", self.on_uninstall_clicked, "danger"),
-            ("Start", "media-playback-start-symbolic", self.on_start_clicked, "success"),
-            ("Stop", "media-playback-stop-symbolic", self.on_stop_clicked, "warning"),
-            ("Restart", "view-refresh-symbolic", self.on_restart_clicked, "info"),
-            ("Status", "dialog-information-symbolic", self.on_status_clicked, "info"),
-            ("Update", "software-update-available-symbolic", self.on_update_clicked, "info"),
-            ("Test", "applications-system-symbolic", self.on_test_clicked, "neutral"),
-            ("Refresh", "view-refresh-symbolic", self.on_refresh_clicked, "neutral")
+            ("Install Service", "list-add-symbolic", self.on_install_clicked, "success"),
+            ("Container Status", "dialog-information-symbolic", self.on_status_clicked, "info"),
+            ("Test Docker", "applications-system-symbolic", self.on_test_clicked, "neutral"),
+            ("Refresh List", "view-refresh-symbolic", self.on_refresh_clicked, "neutral")
         ]
 
         for label, icon_name, callback, style_class in commands:
@@ -1415,7 +1509,35 @@ class DockerManagerWindow(Gtk.Window):
     def update_running_container_view(self):
         # Update containers
         self.running_container_store.clear()
-        running_containers = core.get_running_container_details(self.client)
+
+        # Log the current connection for debugging
+        try:
+            import logging
+            logging.info(f"Updating container view. Docker host: {self.docker_host}")
+            logging.info(f"Client base URL: {self.client.api.base_url if hasattr(self.client, 'api') else 'N/A'}")
+        except Exception as e:
+            pass
+
+        def fetch_containers():
+            return core.get_running_container_details(self.client)
+
+        # For remote connections, show progress
+        if self.docker_host:
+            status_messages = [
+                f"Connecting to {self.docker_host}...",
+                "Fetching container list...",
+                "Loading container details..."
+            ]
+            running_containers = self.run_with_progress(
+                "Refreshing Containers",
+                fetch_containers,
+                status_messages
+            )
+            if running_containers is None:
+                running_containers = []
+        else:
+            running_containers = fetch_containers()
+
         for container in running_containers:
             self.running_container_store.append([
                 container['id'],
@@ -1696,12 +1818,68 @@ class DockerManagerWindow(Gtk.Window):
         separator = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
         grid.attach(separator, 0, 1, 2, 1)
 
-        widgets = {"variables": {}, "ports": {}, "volume_mappings": {}}
+        # Container Name field
         current_row = 2
+        container_name_label = Gtk.Label(label="Container Name:", xalign=0)
+        container_name_label.set_tooltip_text("The name for the Docker container (must be unique)")
+
+        # Create HBox for entry + auto-generate button
+        name_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
+
+        container_name_entry = Gtk.Entry()
+        default_name = service_config.get('name', service_name)
+        container_name_entry.set_text(default_name)
+        container_name_entry.set_placeholder_text("Enter a unique container name")
+        container_name_entry.set_hexpand(True)
+        name_hbox.pack_start(container_name_entry, True, True, 0)
+
+        # Auto-generate unique name button
+        auto_name_button = Gtk.Button()
+        auto_icon = Gtk.Image.new_from_icon_name("view-refresh-symbolic", Gtk.IconSize.BUTTON)
+        auto_name_button.add(auto_icon)
+        auto_name_button.set_tooltip_text("Generate unique name")
+
+        def on_auto_name_clicked(button):
+            base_name = service_config.get('name', service_name)
+            existing = [c.name for c in self.client.containers.list(all=True)]
+            counter = 1
+            new_name = base_name
+            while new_name in existing:
+                new_name = f"{base_name}-{counter}"
+                counter += 1
+            container_name_entry.set_text(new_name)
+
+        auto_name_button.connect("clicked", on_auto_name_clicked)
+        name_hbox.pack_start(auto_name_button, False, False, 0)
+
+        grid.attach(container_name_label, 0, current_row, 1, 1)
+        grid.attach(name_hbox, 1, current_row, 1, 1)
+        current_row += 1
+
+        # Add a small caption
+        name_hint_label = Gtk.Label(xalign=0)
+        name_hint_label.set_markup('<span size="small"><i>Must be unique. Can contain letters, numbers, hyphens, and underscores.</i></span>')
+        name_hint_label.set_line_wrap(True)
+        name_hint_label.get_style_context().add_class('dim-label')
+        grid.attach(name_hint_label, 0, current_row, 2, 1)
+        current_row += 1
+
+        # Add separator
+        separator2 = Gtk.Separator(orientation=Gtk.Orientation.HORIZONTAL)
+        grid.attach(separator2, 0, current_row, 2, 1)
+        current_row += 1
+
+        widgets = {"variables": {}, "ports": {}, "volume_mappings": {}, "container_name": container_name_entry}
 
         # Create inputs for variables
         for var in service_config.get('variables', []):
-            label = Gtk.Label(label=var['label'], xalign=0)
+            var_type = var.get('type', 'string')
+            # For path types, clarify this is the host path
+            label_text = var['label']
+            if var_type in ['path', 'directory']:
+                label_text = f"{var['label']} (Host Path)"
+
+            label = Gtk.Label(label=label_text, xalign=0)
             label.set_tooltip_text(var.get('description', ''))
 
             input_widget = None
@@ -1742,11 +1920,18 @@ class DockerManagerWindow(Gtk.Window):
                     current_row += 1
 
             elif var_type in ['path', 'directory']: # Path/directory types
+                # For path/directory types:
+                # - The 'default' in YAML is the CONTAINER path
+                # - We need a HOST path for volume mapping
+                # - User enters HOST path, we map it to CONTAINER path
+
                 # Create a horizontal box for entry + browse button
                 hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=4)
 
                 input_widget = Gtk.Entry()
-                input_widget.set_text(str(var.get('default', '')))
+                # For path types, show empty for host path (user needs to provide)
+                input_widget.set_text('')
+                input_widget.set_placeholder_text("Enter host path (e.g., /home/user/data)")
                 input_widget.set_hexpand(True)
                 hbox.pack_start(input_widget, True, True, 0)
 
@@ -1773,15 +1958,37 @@ class DockerManagerWindow(Gtk.Window):
                     current_row += 1
 
                 # Add volume mapping checkbox and container path entry
-                volume_check = Gtk.CheckButton(label="Map as volume to container path:")
-                volume_check.set_active(False)
+                volume_check = Gtk.CheckButton(label="Map as volume (enabled)")
+                volume_check.set_active(True)  # Enable by default for path types
                 grid.attach(volume_check, 0, current_row, 1, 1)
 
+                # Container path label
+                container_label = Gtk.Label(label="Container Path:", xalign=0)
+                grid.attach(container_label, 1, current_row, 1, 1)
+                current_row += 1
+
+                # Empty cell for alignment
+                grid.attach(Gtk.Label(), 0, current_row, 1, 1)
+
                 container_path_entry = Gtk.Entry()
-                container_path_entry.set_text(var.get('container_path', f"/data/{var['name']}"))
-                container_path_entry.set_placeholder_text("Container mount path (e.g., /data)")
-                container_path_entry.set_sensitive(False)
+                # Use 'default' from YAML as the container path
+                default_container_path = var.get('default', f"/data/{var['name']}")
+                container_path_entry.set_text(default_container_path)
+                container_path_entry.set_placeholder_text("Container mount path (e.g., /var/lib/postgresql/data)")
+                container_path_entry.set_sensitive(True)  # Allow editing
                 grid.attach(container_path_entry, 1, current_row, 1, 1)
+                current_row += 1
+
+                # Add helpful mapping explanation
+                mapping_hint = Gtk.Label(xalign=0)
+                mapping_hint.set_markup(
+                    f'<span size="small"><i>Volume mapping: '
+                    f'<b>(host path)</b> → <b>(container path)</b></i></span>'
+                )
+                mapping_hint.set_line_wrap(True)
+                mapping_hint.get_style_context().add_class('dim-label')
+                grid.attach(mapping_hint, 0, current_row, 2, 1)
+                current_row += 1
 
                 # Enable/disable container path entry based on checkbox
                 def on_volume_check_toggled(check, entry):
@@ -1847,6 +2054,12 @@ class DockerManagerWindow(Gtk.Window):
 
             # Collect config values
             config_values = {"variables": {}, "ports": {}, "volume_mappings": {}}
+
+            # Get container name
+            container_name = widgets["container_name"].get_text().strip()
+            if container_name:
+                config_values["container_name"] = container_name
+
             for name, widget in widgets["variables"].items():
                 if isinstance(widget, Gtk.CheckButton):
                     config_values["variables"][name] = widget.get_active()
@@ -1890,12 +2103,65 @@ class DockerManagerWindow(Gtk.Window):
 
             elif response == Gtk.ResponseType.OK:
                 # Install button clicked
+                # Validate container name
+                container_name = config_values.get("container_name", "")
+                if not container_name:
+                    self.show_error_dialog("Container name cannot be empty.")
+                    continue
+
+                # Validate container name format (Docker rules)
+                import re
+                if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_.-]*$', container_name):
+                    self.show_error_dialog(
+                        "Invalid container name.\n\n"
+                        "Container names must:\n"
+                        "• Start with a letter or number\n"
+                        "• Contain only letters, numbers, hyphens, underscores, and periods\n"
+                        "• Not contain spaces or special characters"
+                    )
+                    continue
+
+                # Check if container name already exists
+                try:
+                    existing_containers = [c.name for c in self.client.containers.list(all=True)]
+                    if container_name in existing_containers:
+                        confirm_dialog = Gtk.MessageDialog(
+                            transient_for=self,
+                            flags=0,
+                            message_type=Gtk.MessageType.WARNING,
+                            buttons=Gtk.ButtonsType.YES_NO,
+                            text=f"Container '{container_name}' already exists",
+                        )
+                        confirm_dialog.format_secondary_text(
+                            "A container with this name already exists.\n\n"
+                            "Do you want to remove it and create a new one?"
+                        )
+                        response_confirm = confirm_dialog.run()
+                        confirm_dialog.destroy()
+
+                        if response_confirm == Gtk.ResponseType.YES:
+                            # Remove existing container
+                            try:
+                                existing = self.client.containers.get(container_name)
+                                existing.stop()
+                                existing.remove()
+                                self.textbuffer.set_text(f"Removed existing container: {container_name}\n")
+                            except Exception as e:
+                                self.show_error_dialog(f"Failed to remove existing container: {e}")
+                                continue
+                        else:
+                            # User cancelled, keep dialog open
+                            continue
+                except Exception as e:
+                    self.show_error_dialog(f"Failed to check existing containers: {e}")
+                    continue
+
                 command = core.install_service(service_config, config_values)
 
                 # Show confirmation dialog
                 if self.show_install_confirmation_dialog(service_config.get('name', service_name), command):
                     # User confirmed, execute the command
-                    success, output = self.execute_docker_command(command)
+                    success, output = self.execute_docker_command(command, config_values)
 
                     # Update output display
                     status_msg = f"{'✓' if success else '✗'} Installation of {service_name}:\n{output}\n"
@@ -1980,9 +2246,24 @@ class DockerManagerWindow(Gtk.Window):
 
         return response == Gtk.ResponseType.YES
 
-    def execute_docker_command(self, command_output):
+    def execute_docker_command(self, command_output, config_values=None):
         """Execute the Docker command and return success status and output"""
         import subprocess
+        import os
+
+        # Create host directories for volume mappings if needed
+        created_dirs = []
+        if config_values:
+            volume_mappings = config_values.get('volume_mappings', {})
+            for var_name, mapping in volume_mappings.items():
+                if mapping.get('enabled'):
+                    host_path = mapping.get('host_path', '').strip()
+                    if host_path and not os.path.exists(host_path):
+                        try:
+                            os.makedirs(host_path, exist_ok=True)
+                            created_dirs.append(host_path)
+                        except Exception as e:
+                            return False, f"Error creating directory {host_path}: {str(e)}"
 
         # Extract the actual command from the output
         command = command_output.replace("Generated command:\n", "").strip()
@@ -1999,6 +2280,10 @@ class DockerManagerWindow(Gtk.Window):
 
             if result.returncode == 0:
                 output = result.stdout if result.stdout else "Container started successfully"
+                # Prepend directory creation messages if any
+                if created_dirs:
+                    dir_msgs = "\n".join([f"✓ Created directory: {d}" for d in created_dirs])
+                    output = f"{dir_msgs}\n\n{output}"
                 return True, output
             else:
                 error_msg = result.stderr if result.stderr else result.stdout
@@ -2244,14 +2529,28 @@ class DockerManagerWindow(Gtk.Window):
         import subprocess
         import shutil
 
+        # Build the docker exec command based on connection type
+        if self.docker_host and self.docker_host.startswith('ssh://'):
+            # For SSH connections, we need to use docker -H
+            docker_cmd = ['docker', '-H', self.docker_host, 'exec', '-it', container_id, '/bin/sh']
+            docker_cmd_str = f'docker -H {self.docker_host} exec -it {container_id} /bin/sh'
+        elif self.docker_host:
+            # For other remote connections (tcp://, etc.)
+            docker_cmd = ['docker', '-H', self.docker_host, 'exec', '-it', container_id, '/bin/sh']
+            docker_cmd_str = f'docker -H {self.docker_host} exec -it {container_id} /bin/sh'
+        else:
+            # Local connection
+            docker_cmd = ['docker', 'exec', '-it', container_id, '/bin/sh']
+            docker_cmd_str = f'docker exec -it {container_id} /bin/sh'
+
         # Try to find available terminal emulators
         terminals = [
-            ('gnome-terminal', ['gnome-terminal', '--', 'docker', 'exec', '-it', container_id, '/bin/sh']),
-            ('xterm', ['xterm', '-e', f'docker exec -it {container_id} /bin/sh']),
-            ('konsole', ['konsole', '-e', f'docker exec -it {container_id} /bin/sh']),
-            ('xfce4-terminal', ['xfce4-terminal', '-e', f'docker exec -it {container_id} /bin/sh']),
-            ('mate-terminal', ['mate-terminal', '-e', f'docker exec -it {container_id} /bin/sh']),
-            ('terminator', ['terminator', '-e', f'docker exec -it {container_id} /bin/sh']),
+            ('gnome-terminal', ['gnome-terminal', '--'] + docker_cmd),
+            ('xterm', ['xterm', '-e', docker_cmd_str]),
+            ('konsole', ['konsole', '-e', docker_cmd_str]),
+            ('xfce4-terminal', ['xfce4-terminal', '-e', docker_cmd_str]),
+            ('mate-terminal', ['mate-terminal', '-e', docker_cmd_str]),
+            ('terminator', ['terminator', '-e', docker_cmd_str]),
         ]
 
         # Find the first available terminal
@@ -2267,16 +2566,39 @@ class DockerManagerWindow(Gtk.Window):
                 "No supported terminal emulator found.\n\n"
                 "Supported terminals: gnome-terminal, xterm, konsole, xfce4-terminal, mate-terminal, terminator\n\n"
                 "You can manually run:\n"
-                f"docker exec -it {container_id} /bin/sh"
+                f"{docker_cmd_str}"
             )
             return
 
-        try:
-            # Launch terminal in background
-            subprocess.Popen(terminal_found, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            self.textbuffer.set_text(f"✓ Opened terminal for container: {container_name} ({container_id})")
-        except Exception as e:
-            self.textbuffer.set_text(f"✗ Error opening terminal for {container_name}: {str(e)}")
+        # For remote connections, show progress dialog
+        if self.docker_host:
+            status_messages = [
+                f"Connecting to {self.docker_host}...",
+                "Establishing SSH tunnel...",
+                "Opening terminal session...",
+                "Waiting for container response..."
+            ]
+
+            def launch_terminal():
+                subprocess.Popen(terminal_found, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return True
+
+            result = self.run_with_progress(
+                f"Opening Terminal: {container_name}",
+                launch_terminal,
+                status_messages
+            )
+
+            if result:
+                host_info = f" on {self.docker_host}"
+                self.textbuffer.set_text(f"✓ Opened terminal for container: {container_name} ({container_id}){host_info}")
+        else:
+            # Local - no progress dialog needed
+            try:
+                subprocess.Popen(terminal_found, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                self.textbuffer.set_text(f"✓ Opened terminal for container: {container_name} ({container_id}) (local)")
+            except Exception as e:
+                self.textbuffer.set_text(f"✗ Error opening terminal for {container_name}: {str(e)}")
 
     def backup_container(self, container_id, container_name):
         """Comprehensive backup dialog with multiple options"""
@@ -3322,16 +3644,18 @@ class DockerManagerWindow(Gtk.Window):
         import subprocess
 
         service_name = service_config.get('name', 'service')
+        # Use custom container name if provided
+        container_name = config_values.get('container_name', service_name)
 
         # Generate docker-compose content
         compose = {
             'version': '3.8',
             'services': {
-                service_name: {}
+                container_name: {}
             }
         }
 
-        service_def = compose['services'][service_name]
+        service_def = compose['services'][container_name]
 
         # Image
         image = service_config.get('image')
@@ -3339,7 +3663,7 @@ class DockerManagerWindow(Gtk.Window):
             service_def['image'] = image
 
         # Container name
-        service_def['container_name'] = service_name
+        service_def['container_name'] = container_name
 
         # Environment variables
         env_dict = {}
@@ -3396,14 +3720,15 @@ class DockerManagerWindow(Gtk.Window):
         yaml_output = yaml.dump(compose, default_flow_style=False, sort_keys=False, indent=2)
 
         # Add header comment
-        header = f"# docker-compose.yml for service: {service_name}\n"
+        header = f"# docker-compose.yml for {container_name}\n"
+        header += f"# Service: {service_name}\n"
         header += f"# Generated by Docker Helper on {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
 
         compose_content = header + yaml_output
 
         # Show file save dialog
         save_dialog = Gtk.FileChooserDialog(
-            title=f"Save docker-compose.yml for '{service_name}'",
+            title=f"Save docker-compose.yml for '{container_name}'",
             transient_for=self,
             action=Gtk.FileChooserAction.SAVE
         )
@@ -3411,7 +3736,8 @@ class DockerManagerWindow(Gtk.Window):
             Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
             Gtk.STOCK_SAVE, Gtk.ResponseType.OK
         )
-        save_dialog.set_current_name("docker-compose.yml")
+        # Suggest a filename based on container name
+        save_dialog.set_current_name(f"{container_name}-compose.yml")
         save_dialog.set_do_overwrite_confirmation(True)
 
         # Add file filter
@@ -3439,7 +3765,7 @@ class DockerManagerWindow(Gtk.Window):
                     f.write(compose_content)
 
                 self.textbuffer.set_text(
-                    f"✓ Saved docker-compose.yml for '{service_name}'\n"
+                    f"✓ Saved docker-compose.yml for '{container_name}'\n"
                     f"✓ File saved: {filepath}\n"
                 )
 
@@ -3449,7 +3775,7 @@ class DockerManagerWindow(Gtk.Window):
                     flags=0,
                     message_type=Gtk.MessageType.QUESTION,
                     buttons=Gtk.ButtonsType.YES_NO,
-                    text=f"Deploy '{service_name}' now?",
+                    text=f"Deploy '{container_name}' now?",
                 )
                 deploy_dialog.format_secondary_text(
                     f"The docker-compose.yml file has been saved to:\n{filepath}\n\n"
@@ -3475,7 +3801,7 @@ class DockerManagerWindow(Gtk.Window):
                             output = result.stdout if result.stdout else "Container created successfully"
                             self.textbuffer.set_text(
                                 f"✓ Saved docker-compose.yml: {filepath}\n"
-                                f"✓ Deployed '{service_name}' successfully!\n\n"
+                                f"✓ Deployed '{container_name}' successfully!\n\n"
                                 f"Output:\n{output}"
                             )
                             return "deployed"
@@ -3513,18 +3839,6 @@ class DockerManagerWindow(Gtk.Window):
             save_dialog.destroy()
             return "cancelled"
 
-    def on_uninstall_clicked(self, widget):
-        self.run_command(core.uninstall_service)
-
-    def on_start_clicked(self, widget):
-        self.run_command(core.start_service)
-
-    def on_stop_clicked(self, widget):
-        self.run_command(core.stop_service)
-
-    def on_restart_clicked(self, widget):
-        self.run_command(core.restart_service)
-
     def on_status_clicked(self, widget):
         selected_services = self.get_selected_services()
         if not selected_services:
@@ -3533,9 +3847,6 @@ class DockerManagerWindow(Gtk.Window):
         else:
             output = core.get_status(self.client, selected_services)
         self.textbuffer.set_text(output)
-
-    def on_update_clicked(self, widget):
-        self.run_command(core.update_service)
 
     def on_test_clicked(self, widget):
         output = core.test_container(self.client)
@@ -3608,45 +3919,62 @@ class DockerManagerWindow(Gtk.Window):
             """List files in the specified directory"""
             file_store.clear()
 
-            try:
-                # Use docker exec to list directory contents
-                # Use ls -1Ap to get one file per line, with / for dirs, without . and ..
-                cmd = ['docker', 'exec', container_id, 'ls', '-1Ap', path]
+            def do_list():
+                # Build command based on connection type
+                if self.docker_host:
+                    cmd = ['docker', '-H', self.docker_host, 'exec', container_id, 'ls', '-1Ap', path]
+                else:
+                    cmd = ['docker', 'exec', container_id, 'ls', '-1Ap', path]
                 result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
 
                 if result.returncode != 0:
-                    self.show_error_dialog(f"Cannot access path: {path}\n{result.stderr}")
+                    raise Exception(f"Cannot access path: {path}\n{result.stderr}")
+
+                return result.stdout.strip().split('\n')
+
+            # For remote connections, show progress
+            if self.docker_host:
+                status_messages = [
+                    f"Connecting to {self.docker_host}...",
+                    f"Reading directory: {path}...",
+                    "Retrieving file list..."
+                ]
+                lines = self.run_with_progress(
+                    f"Browse: {path}",
+                    do_list,
+                    status_messages
+                )
+                if lines is None:
+                    return
+            else:
+                try:
+                    lines = do_list()
+                except Exception as e:
+                    self.show_error_dialog(str(e))
                     return
 
-                lines = result.stdout.strip().split('\n')
+            # Add parent directory entry if not at root
+            if path != '/':
+                parent_path = os.path.dirname(path.rstrip('/'))
+                if not parent_path:
+                    parent_path = '/'
+                file_store.append(['..', 'Directory', parent_path])
 
-                # Add parent directory entry if not at root
-                if path != '/':
-                    parent_path = os.path.dirname(path.rstrip('/'))
-                    if not parent_path:
-                        parent_path = '/'
-                    file_store.append(['..', 'Directory', parent_path])
+            for line in lines:
+                if not line or line == './':
+                    continue
 
-                for line in lines:
-                    if not line or line == './':
-                        continue
+                name = line.rstrip('/')
+                is_dir = line.endswith('/')
 
-                    name = line.rstrip('/')
-                    is_dir = line.endswith('/')
+                full_path = os.path.join(path, name)
+                if path.endswith('/'):
+                    full_path = path + name
 
-                    full_path = os.path.join(path, name)
-                    if path.endswith('/'):
-                        full_path = path + name
+                file_type = 'Directory' if is_dir else 'File'
+                display_name = name + '/' if is_dir else name
 
-                    file_type = 'Directory' if is_dir else 'File'
-                    display_name = name + '/' if is_dir else name
-
-                    file_store.append([display_name, file_type, full_path])
-
-            except subprocess.TimeoutExpired:
-                self.show_error_dialog("Listing directory timed out.")
-            except Exception as e:
-                self.show_error_dialog(f"Error listing directory: {str(e)}")
+                file_store.append([display_name, file_type, full_path])
 
         def on_row_activated(treeview, path, column):
             """Handle double-click on a file/directory"""
@@ -3826,7 +4154,11 @@ class DockerManagerWindow(Gtk.Window):
 
             # Execute docker cp command
             try:
-                cmd = ['docker', 'cp', f'{container_id}:{container_path}', host_path]
+                # Build command based on connection type
+                if self.docker_host:
+                    cmd = ['docker', '-H', self.docker_host, 'cp', f'{container_id}:{container_path}', host_path]
+                else:
+                    cmd = ['docker', 'cp', f'{container_id}:{container_path}', host_path]
                 result = subprocess.run(
                     cmd,
                     capture_output=True,
@@ -3901,6 +4233,660 @@ class DockerManagerWindow(Gtk.Window):
         else:
             dialog.destroy()
 
+    def on_connection_button_clicked(self, button):
+        """Show connection menu when connection button is clicked"""
+        menu = Gtk.Menu()
+
+        # Local connection option
+        local_item = Gtk.MenuItem(label="Connect to Local Docker")
+        local_item.connect("activate", self.on_connect_local)
+        menu.append(local_item)
+
+        menu.append(Gtk.SeparatorMenuItem())
+
+        # Saved remote hosts
+        remote_hosts = config.list_remote_hosts()
+        if remote_hosts:
+            for name, info in remote_hosts.items():
+                host_item = Gtk.MenuItem(label=f"Connect to {name} ({info['host']})")
+                host_item.connect("activate", self.on_connect_remote, info['docker_host'])
+                menu.append(host_item)
+
+            menu.append(Gtk.SeparatorMenuItem())
+
+        # Custom connection option
+        custom_item = Gtk.MenuItem(label="Custom Connection...")
+        custom_item.connect("activate", self.on_custom_connection)
+        menu.append(custom_item)
+
+        # Manage remote hosts option
+        manage_item = Gtk.MenuItem(label="Manage Remote Hosts...")
+        manage_item.connect("activate", self.on_manage_remotes)
+        menu.append(manage_item)
+
+        menu.show_all()
+        menu.popup_at_widget(button, Gdk.Gravity.SOUTH, Gdk.Gravity.NORTH, None)
+
+    def on_connect_local(self, menu_item):
+        """Connect to local Docker daemon"""
+        self.reconnect_to_host(None)
+        # Clear default host (set to local)
+        config.set_default_host(None)
+
+    def on_connect_remote(self, menu_item, docker_host):
+        """Connect to a saved remote host"""
+        self.reconnect_to_host(docker_host)
+
+        # Find the name of this remote host and set it as default
+        remote_hosts = config.list_remote_hosts()
+        for name, info in remote_hosts.items():
+            if info['docker_host'] == docker_host:
+                config.set_default_host(name)
+                break
+
+    def on_custom_connection(self, menu_item):
+        """Show dialog for custom connection string"""
+        dialog = Gtk.Dialog(
+            title="Custom Docker Connection",
+            transient_for=self,
+            flags=0,
+            buttons=(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_CONNECT, Gtk.ResponseType.OK
+            )
+        )
+        dialog.set_default_size(500, 200)
+
+        content_area = dialog.get_content_area()
+        content_area.set_spacing(12)
+        content_area.set_margin_start(20)
+        content_area.set_margin_end(20)
+        content_area.set_margin_top(12)
+        content_area.set_margin_bottom(12)
+
+        # Instructions
+        label = Gtk.Label()
+        label.set_markup('<b>Enter Docker host connection string:</b>')
+        label.set_xalign(0)
+        content_area.pack_start(label, False, False, 0)
+
+        # Connection string entry
+        entry = Gtk.Entry()
+        entry.set_placeholder_text("ssh://user@host or ssh://user@host:port")
+        entry.set_activates_default(True)
+        content_area.pack_start(entry, False, False, 0)
+
+        # Examples
+        examples_label = Gtk.Label()
+        examples_label.set_markup(
+            '<span size="small">Examples:\n'
+            '  • ssh://user@192.168.1.100\n'
+            '  • ssh://user@example.com:2222\n'
+            '  • tcp://192.168.1.100:2375</span>'
+        )
+        examples_label.set_xalign(0)
+        examples_label.get_style_context().add_class('dim-label')
+        content_area.pack_start(examples_label, False, False, 0)
+
+        dialog.show_all()
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            docker_host = entry.get_text().strip()
+            if docker_host:
+                self.reconnect_to_host(docker_host)
+
+        dialog.destroy()
+
+    def on_manage_remotes(self, menu_item):
+        """Show dialog to manage saved remote hosts"""
+        dialog = Gtk.Dialog(
+            title="Manage Remote Hosts",
+            transient_for=self,
+            flags=0,
+            buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.CLOSE)
+        )
+        dialog.set_default_size(700, 400)
+
+        content_area = dialog.get_content_area()
+        content_area.set_spacing(12)
+        content_area.set_margin_start(20)
+        content_area.set_margin_end(20)
+        content_area.set_margin_top(12)
+        content_area.set_margin_bottom(12)
+
+        # Header
+        header_label = Gtk.Label()
+        header_label.set_markup('<b>Remote Docker Hosts</b>')
+        header_label.set_xalign(0)
+        content_area.pack_start(header_label, False, False, 0)
+
+        # List of remote hosts
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
+        scrolled.set_min_content_height(200)
+
+        listbox = Gtk.ListBox()
+        listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        scrolled.add(listbox)
+
+        # Populate list
+        remote_hosts = config.list_remote_hosts()
+        for name, info in remote_hosts.items():
+            row = Gtk.ListBoxRow()
+            hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+            hbox.set_margin_start(12)
+            hbox.set_margin_end(12)
+            hbox.set_margin_top(8)
+            hbox.set_margin_bottom(8)
+
+            # Host info
+            vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+            name_label = Gtk.Label()
+            name_label.set_markup(f'<b>{name}</b>')
+            name_label.set_xalign(0)
+
+            info_label = Gtk.Label()
+            info_label.set_markup(f'<span size="small">{info["docker_host"]}</span>')
+            info_label.set_xalign(0)
+
+            vbox.pack_start(name_label, False, False, 0)
+            vbox.pack_start(info_label, False, False, 0)
+
+            hbox.pack_start(vbox, True, True, 0)
+
+            # Remove button
+            remove_btn = Gtk.Button(label="Remove")
+            remove_btn.connect("clicked", self.on_remove_remote_host, name, listbox, row)
+            hbox.pack_end(remove_btn, False, False, 0)
+
+            row.add(hbox)
+            listbox.add(row)
+
+        content_area.pack_start(scrolled, True, True, 0)
+
+        # Add new host button
+        add_button = Gtk.Button(label="Add New Remote Host")
+        add_button.connect("clicked", self.on_add_remote_host, listbox)
+        content_area.pack_start(add_button, False, False, 0)
+
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+
+    def on_add_remote_host(self, button, listbox):
+        """Show dialog to add a new remote host"""
+        dialog = Gtk.Dialog(
+            title="Add Remote Host",
+            transient_for=self,
+            flags=0,
+            buttons=(
+                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_ADD, Gtk.ResponseType.OK
+            )
+        )
+        dialog.set_default_size(500, 300)
+
+        content_area = dialog.get_content_area()
+        content_area.set_spacing(12)
+        content_area.set_margin_start(20)
+        content_area.set_margin_end(20)
+        content_area.set_margin_top(12)
+        content_area.set_margin_bottom(12)
+
+        grid = Gtk.Grid()
+        grid.set_row_spacing(12)
+        grid.set_column_spacing(12)
+
+        # Name
+        grid.attach(Gtk.Label(label="Name:", xalign=1), 0, 0, 1, 1)
+        name_entry = Gtk.Entry()
+        name_entry.set_placeholder_text("e.g., production")
+        grid.attach(name_entry, 1, 0, 1, 1)
+
+        # Host
+        grid.attach(Gtk.Label(label="Host:", xalign=1), 0, 1, 1, 1)
+        host_entry = Gtk.Entry()
+        host_entry.set_placeholder_text("e.g., 192.168.1.100 or example.com")
+        grid.attach(host_entry, 1, 1, 1, 1)
+
+        # User
+        grid.attach(Gtk.Label(label="User:", xalign=1), 0, 2, 1, 1)
+        user_entry = Gtk.Entry()
+        user_entry.set_placeholder_text("e.g., docker")
+        user_entry.set_text(os.getenv('USER', ''))
+        grid.attach(user_entry, 1, 2, 1, 1)
+
+        # Port
+        grid.attach(Gtk.Label(label="Port:", xalign=1), 0, 3, 1, 1)
+        port_spin = Gtk.SpinButton()
+        port_spin.set_adjustment(Gtk.Adjustment(value=22, lower=1, upper=65535, step_increment=1))
+        grid.attach(port_spin, 1, 3, 1, 1)
+
+        # Description
+        grid.attach(Gtk.Label(label="Description:", xalign=1), 0, 4, 1, 1)
+        desc_entry = Gtk.Entry()
+        desc_entry.set_placeholder_text("Optional description")
+        grid.attach(desc_entry, 1, 4, 1, 1)
+
+        content_area.pack_start(grid, True, True, 0)
+
+        # Add test connection button
+        test_button_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
+        test_button = Gtk.Button(label="Test Connection")
+        test_button.connect("clicked", self.on_test_connection_clicked, host_entry, user_entry, port_spin)
+        test_button_box.pack_start(test_button, False, False, 0)
+
+        self.test_result_label = Gtk.Label()
+        self.test_result_label.set_xalign(0)
+        test_button_box.pack_start(self.test_result_label, True, True, 0)
+
+        content_area.pack_start(test_button_box, False, False, 0)
+
+        dialog.show_all()
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            name = name_entry.get_text().strip()
+            host = host_entry.get_text().strip()
+            user = user_entry.get_text().strip()
+            port = int(port_spin.get_value())
+            description = desc_entry.get_text().strip()
+
+            if name and host and user:
+                try:
+                    config.add_remote_host(name, host, port, user, description)
+
+                    # Add to listbox
+                    row = Gtk.ListBoxRow()
+                    hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+                    hbox.set_margin_start(12)
+                    hbox.set_margin_end(12)
+                    hbox.set_margin_top(8)
+                    hbox.set_margin_bottom(8)
+
+                    vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=4)
+                    name_label = Gtk.Label()
+                    name_label.set_markup(f'<b>{name}</b>')
+                    name_label.set_xalign(0)
+
+                    docker_host = f"ssh://{user}@{host}" if port == 22 else f"ssh://{user}@{host}:{port}"
+                    info_label = Gtk.Label()
+                    info_label.set_markup(f'<span size="small">{docker_host}</span>')
+                    info_label.set_xalign(0)
+
+                    vbox.pack_start(name_label, False, False, 0)
+                    vbox.pack_start(info_label, False, False, 0)
+
+                    hbox.pack_start(vbox, True, True, 0)
+
+                    remove_btn = Gtk.Button(label="Remove")
+                    remove_btn.connect("clicked", self.on_remove_remote_host, name, listbox, row)
+                    hbox.pack_end(remove_btn, False, False, 0)
+
+                    row.add(hbox)
+                    listbox.add(row)
+                    row.show_all()
+
+                except Exception as e:
+                    self.show_error_dialog(f"Failed to add remote host: {e}")
+
+        dialog.destroy()
+
+    def on_test_connection_clicked(self, button, host_entry, user_entry, port_spin):
+        """Test SSH and Docker connection to remote host"""
+        import subprocess
+
+        host = host_entry.get_text().strip()
+        user = user_entry.get_text().strip()
+        port = int(port_spin.get_value())
+
+        if not host or not user:
+            self.test_result_label.set_markup('<span foreground="red">Please enter host and user</span>')
+            return
+
+        self.test_result_label.set_markup('<span foreground="blue">Testing...</span>')
+
+        # Force UI update
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
+        # Test SSH connection
+        try:
+            result = subprocess.run(
+                ['ssh', '-p', str(port), '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=5',
+                 f'{user}@{host}', 'exit'],
+                capture_output=True,
+                timeout=10
+            )
+
+            if result.returncode == 0:
+                # SSH works, now test Docker
+                docker_result = subprocess.run(
+                    ['ssh', '-p', str(port), f'{user}@{host}', 'docker', 'ps'],
+                    capture_output=True,
+                    timeout=10
+                )
+
+                if docker_result.returncode == 0:
+                    self.test_result_label.set_markup('<span foreground="green">✓ Connection successful!</span>')
+                else:
+                    error_msg = docker_result.stderr.decode('utf-8', errors='ignore').strip()
+                    if 'permission denied' in error_msg.lower():
+                        self.test_result_label.set_markup(
+                            '<span foreground="orange">⚠ SSH works but Docker access denied. '
+                            'Add user to docker group on remote.</span>'
+                        )
+                    elif 'command not found' in error_msg.lower():
+                        self.test_result_label.set_markup(
+                            '<span foreground="red">✗ Docker not installed on remote</span>'
+                        )
+                    else:
+                        self.test_result_label.set_markup(
+                            f'<span foreground="red">✗ Docker error: {error_msg[:50]}</span>'
+                        )
+            else:
+                self.test_result_label.set_markup(
+                    '<span foreground="red">✗ SSH connection failed. Set up SSH keys first.</span>'
+                )
+        except subprocess.TimeoutExpired:
+            self.test_result_label.set_markup('<span foreground="red">✗ Connection timeout</span>')
+        except Exception as e:
+            self.test_result_label.set_markup(f'<span foreground="red">✗ Error: {str(e)[:50]}</span>')
+
+    def on_remove_remote_host(self, button, name, listbox, row):
+        """Remove a remote host"""
+        confirm = Gtk.MessageDialog(
+            transient_for=self,
+            flags=0,
+            message_type=Gtk.MessageType.QUESTION,
+            buttons=Gtk.ButtonsType.YES_NO,
+            text=f"Remove remote host '{name}'?",
+        )
+        confirm.format_secondary_text("This will remove the saved configuration.")
+
+        response = confirm.run()
+        confirm.destroy()
+
+        if response == Gtk.ResponseType.YES:
+            try:
+                config.remove_remote_host(name)
+                listbox.remove(row)
+            except Exception as e:
+                self.show_error_dialog(f"Failed to remove remote host: {e}")
+
+    def reconnect_to_host(self, docker_host):
+        """Reconnect to a different Docker host"""
+
+        def do_reconnect():
+            # Try to connect to the new host
+            new_client = core.get_client(docker_host=docker_host)
+
+            # Close old client if it exists
+            if hasattr(self, 'client') and self.client:
+                try:
+                    self.client.close()
+                except Exception:
+                    pass
+
+            return new_client
+
+        # Show progress dialog for connections
+        status_messages = []
+        if docker_host:
+            status_messages = [
+                f"Connecting to {docker_host}...",
+                "Authenticating...",
+                "Verifying Docker daemon...",
+                "Establishing connection..."
+            ]
+        else:
+            status_messages = ["Connecting to local Docker daemon..."]
+
+        try:
+            new_client = self.run_with_progress(
+                f"Connecting to {'Remote' if docker_host else 'Local'} Docker",
+                do_reconnect,
+                status_messages
+            )
+
+            if new_client is None:
+                return  # User cancelled
+
+            # Connection successful, update the client
+            self.client = new_client
+            self.docker_host = docker_host
+
+            # Update the subtitle
+            subtitle_text = f'Connected to: {docker_host}' if docker_host else 'Connected to: Local Docker'
+            self.subtitle_label.set_markup(f'<span size="small">{subtitle_text}</span>')
+
+            # Refresh the views
+            self.refresh_views()
+
+            # Show success message with container count for verification
+            container_count = len(self.client.containers.list(all=True))
+            current_text = self.textbuffer.get_text(
+                self.textbuffer.get_start_iter(),
+                self.textbuffer.get_end_iter(),
+                False
+            )
+            success_msg = f"Successfully connected to: {docker_host or 'Local Docker'}\n"
+            success_msg += f"Found {container_count} containers on this host.\n"
+            success_msg += "This connection will be remembered for next time.\n"
+            self.textbuffer.set_text(current_text + success_msg if current_text else success_msg)
+
+        except ConnectionError as e:
+            self.show_connection_error_dialog(docker_host, str(e))
+        except Exception as e:
+            self.show_connection_error_dialog(docker_host, str(e))
+
+    def refresh_views(self):
+        """Refresh all views after reconnecting"""
+        # Refresh all views
+        self.update_service_list()
+        self.update_running_container_view()
+
+        # Clear output
+        self.textbuffer.set_text("")
+
+    def show_connection_error_dialog(self, docker_host, error_message):
+        """Show a detailed error dialog for connection failures with troubleshooting tips"""
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            flags=0,
+            message_type=Gtk.MessageType.ERROR,
+            buttons=Gtk.ButtonsType.OK,
+            text="Connection Failed",
+        )
+
+        # Determine the type of connection
+        is_ssh = docker_host and docker_host.startswith('ssh://')
+
+        if is_ssh:
+            # Extract host info for troubleshooting
+            host_info = docker_host.replace('ssh://', '')
+
+            secondary_text = f"Failed to connect to: {docker_host}\n\n"
+            secondary_text += f"Error: {error_message}\n\n"
+            secondary_text += "Common issues:\n\n"
+            secondary_text += "1. SSH Key Authentication Not Set Up\n"
+            secondary_text += f"   Run: ./setup_remote_ssh.sh\n"
+            secondary_text += f"   Or manually: ssh-copy-id {host_info.split(':')[0]}\n\n"
+            secondary_text += "2. User Not in Docker Group (on remote)\n"
+            secondary_text += f"   SSH to remote and run: sudo usermod -aG docker $USER\n"
+            secondary_text += "   Then log out and back in\n\n"
+            secondary_text += "3. Docker Not Running (on remote)\n"
+            secondary_text += f"   SSH to remote and run: sudo systemctl start docker\n\n"
+            secondary_text += "4. Firewall/Network Issues\n"
+            secondary_text += f"   Test SSH access: ssh {host_info.split(':')[0]}\n"
+            secondary_text += f"   Test Docker: ssh {host_info.split(':')[0]} 'docker ps'\n"
+        else:
+            secondary_text = f"Failed to connect to Docker daemon.\n\n"
+            secondary_text += f"Error: {error_message}\n\n"
+            secondary_text += "Common issues:\n\n"
+            secondary_text += "1. Docker Not Running\n"
+            secondary_text += "   Run: sudo systemctl start docker\n\n"
+            secondary_text += "2. Permission Issues\n"
+            secondary_text += "   Make sure you're in the docker group\n"
+            secondary_text += "   Run: sudo usermod -aG docker $USER\n"
+            secondary_text += "   Then log out and back in\n"
+
+        dialog.format_secondary_text(secondary_text)
+
+        # Add button to run setup script for SSH connections
+        if is_ssh:
+            dialog.add_button("Run Setup Helper", Gtk.ResponseType.APPLY)
+
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.APPLY:
+            dialog.destroy()
+            self.run_ssh_setup_helper(docker_host)
+        else:
+            dialog.destroy()
+
+    def run_ssh_setup_helper(self, docker_host):
+        """Open a terminal to run the SSH setup helper"""
+        import subprocess
+
+        helper_script = os.path.join(os.path.dirname(__file__), 'setup_remote_ssh.sh')
+
+        if not os.path.exists(helper_script):
+            self.show_error_dialog("setup_remote_ssh.sh not found in the application directory.")
+            return
+
+        # Try different terminal emulators
+        terminals = [
+            ['gnome-terminal', '--', 'bash', helper_script],
+            ['konsole', '-e', 'bash', helper_script],
+            ['xfce4-terminal', '-e', f'bash {helper_script}'],
+            ['xterm', '-e', f'bash {helper_script}'],
+            ['x-terminal-emulator', '-e', f'bash {helper_script}'],
+        ]
+
+        for terminal_cmd in terminals:
+            try:
+                subprocess.Popen(terminal_cmd)
+                return
+            except FileNotFoundError:
+                continue
+
+        # If no terminal found, show instructions
+        dialog = Gtk.MessageDialog(
+            transient_for=self,
+            flags=0,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.OK,
+            text="Run Setup Helper",
+        )
+        dialog.format_secondary_text(
+            f"Please open a terminal and run:\n\n"
+            f"cd {os.path.dirname(__file__)}\n"
+            f"./setup_remote_ssh.sh"
+        )
+        dialog.run()
+        dialog.destroy()
+
+    def run_with_progress(self, title, operation_func, status_updates=None):
+        """
+        Run a function with a progress dialog showing status updates.
+
+        Args:
+            title: Dialog title
+            operation_func: Function to run (should be a callable)
+            status_updates: Optional list of status messages to cycle through
+
+        Returns:
+            Result from operation_func or None if cancelled/error
+        """
+        if status_updates is None:
+            status_updates = ["Connecting to remote host...", "Processing..."]
+
+        # Create progress dialog
+        dialog = Gtk.Dialog(
+            title=title,
+            transient_for=self,
+            flags=Gtk.DialogFlags.MODAL
+        )
+        dialog.set_default_size(400, 150)
+        dialog.set_deletable(False)
+
+        content_area = dialog.get_content_area()
+        content_area.set_margin_start(20)
+        content_area.set_margin_end(20)
+        content_area.set_margin_top(20)
+        content_area.set_margin_bottom(20)
+
+        # Status label
+        status_label = Gtk.Label()
+        status_label.set_markup(f"<b>{status_updates[0]}</b>")
+        status_label.set_xalign(0)
+        content_area.pack_start(status_label, False, False, 10)
+
+        # Progress bar
+        progress_bar = Gtk.ProgressBar()
+        progress_bar.set_pulse_step(0.1)
+        content_area.pack_start(progress_bar, False, False, 10)
+
+        # Cancel button
+        cancel_button = dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+
+        dialog.show_all()
+
+        # Operation state
+        result = {'value': None, 'error': None, 'cancelled': False}
+        current_status_index = [0]  # Use list to modify in closure
+
+        def update_progress():
+            """Update progress bar and cycle through status messages"""
+            if result['value'] is not None or result['error'] is not None or result['cancelled']:
+                dialog.response(Gtk.ResponseType.OK)
+                return False
+
+            progress_bar.pulse()
+
+            # Cycle through status messages if we have multiple
+            if len(status_updates) > 1:
+                current_status_index[0] = (current_status_index[0] + 1) % len(status_updates)
+                status_label.set_markup(f"<b>{status_updates[current_status_index[0]]}</b>")
+
+            return True
+
+        def run_operation():
+            """Run the operation in a background thread"""
+            try:
+                result['value'] = operation_func()
+            except Exception as e:
+                result['error'] = str(e)
+
+        def on_cancel_clicked(button):
+            """Handle cancel button"""
+            result['cancelled'] = True
+            dialog.response(Gtk.ResponseType.CANCEL)
+
+        cancel_button.connect("clicked", on_cancel_clicked)
+
+        # Start progress updates
+        GLib.timeout_add(200, update_progress)
+
+        # Start operation in background thread
+        thread = threading.Thread(target=run_operation, daemon=True)
+        thread.start()
+
+        # Show dialog and wait
+        response = dialog.run()
+        dialog.destroy()
+
+        # Handle results
+        if result['cancelled']:
+            return None
+        if result['error']:
+            self.show_error_dialog(f"Operation failed: {result['error']}")
+            return None
+
+        return result['value']
+
     def show_error_dialog(self, message):
         dialog = Gtk.MessageDialog(
             transient_for=self,
@@ -3913,8 +4899,375 @@ class DockerManagerWindow(Gtk.Window):
         dialog.run()
         dialog.destroy()
 
-def main():
-    win = DockerManagerWindow()
+class DockerSetupWizard(Gtk.Dialog):
+    """First-run setup wizard for Docker installation"""
+
+    def __init__(self, parent=None):
+        super().__init__(
+            title="Docker Setup Wizard",
+            transient_for=parent,
+            flags=Gtk.DialogFlags.MODAL
+        )
+        self.set_default_size(700, 500)
+        self.set_deletable(False)
+
+        # Detect distribution
+        self.distro_info = self.detect_distro()
+        self.install_success = False
+
+        # Create notebook for wizard pages
+        self.notebook = Gtk.Notebook()
+        self.notebook.set_show_tabs(False)
+        self.notebook.set_show_border(False)
+
+        content_area = self.get_content_area()
+        content_area.pack_start(self.notebook, True, True, 0)
+
+        # Create wizard pages
+        self.create_welcome_page()
+        self.create_install_page()
+        self.create_completion_page()
+
+        # Add buttons
+        self.cancel_button = self.add_button("Skip", Gtk.ResponseType.CANCEL)
+        self.next_button = self.add_button("Next", Gtk.ResponseType.OK)
+        self.next_button.get_style_context().add_class('suggested-action')
+
+        self.show_all()
+
+    def detect_distro(self):
+        """Detect Linux distribution"""
+        info = {
+            'id': 'unknown',
+            'name': 'Unknown Linux',
+            'version': '',
+            'supported': False
+        }
+
+        try:
+            if os.path.exists('/etc/os-release'):
+                with open('/etc/os-release', 'r') as f:
+                    lines = f.readlines()
+                    for line in lines:
+                        if line.startswith('ID='):
+                            info['id'] = line.split('=')[1].strip().strip('"')
+                        elif line.startswith('NAME='):
+                            info['name'] = line.split('=')[1].strip().strip('"')
+                        elif line.startswith('VERSION_ID='):
+                            info['version'] = line.split('=')[1].strip().strip('"')
+
+            # Check if distribution is supported
+            supported_distros = ['ubuntu', 'debian', 'fedora', 'centos', 'rhel',
+                               'rocky', 'almalinux', 'arch', 'manjaro',
+                               'opensuse', 'opensuse-leap', 'opensuse-tumbleweed']
+            info['supported'] = info['id'] in supported_distros
+
+        except Exception as e:
+            print(f"Error detecting distro: {e}")
+
+        return info
+
+    def create_welcome_page(self):
+        """Create welcome page"""
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        page.set_margin_start(40)
+        page.set_margin_end(40)
+        page.set_margin_top(40)
+        page.set_margin_bottom(40)
+
+        # Title
+        title = Gtk.Label()
+        title.set_markup('<span size="xx-large" weight="bold">Welcome to Docker Helper</span>')
+        page.pack_start(title, False, False, 0)
+
+        # Docker not found message
+        message = Gtk.Label()
+        message.set_markup(
+            '<span size="large">Docker is not installed on your system.\n\n'
+            'Would you like to install Docker CE now?</span>'
+        )
+        message.set_line_wrap(True)
+        message.set_justify(Gtk.Justification.CENTER)
+        page.pack_start(message, False, False, 20)
+
+        # System info
+        info_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+
+        system_label = Gtk.Label()
+        system_label.set_markup(
+            f'<b>Detected System:</b> {self.distro_info["name"]}'
+        )
+        system_label.set_xalign(0)
+        info_box.pack_start(system_label, False, False, 0)
+
+        if self.distro_info['supported']:
+            support_label = Gtk.Label()
+            support_label.set_markup(
+                '<span foreground="green">✓ This distribution is supported for automatic installation</span>'
+            )
+            support_label.set_xalign(0)
+            info_box.pack_start(support_label, False, False, 0)
+        else:
+            support_label = Gtk.Label()
+            support_label.set_markup(
+                '<span foreground="orange">⚠ Automatic installation not available for this distribution.\n'
+                'You will need to install Docker manually.</span>'
+            )
+            support_label.set_xalign(0)
+            support_label.set_line_wrap(True)
+            info_box.pack_start(support_label, False, False, 0)
+
+        page.pack_start(info_box, False, False, 20)
+
+        # What will be installed
+        if self.distro_info['supported']:
+            install_info = Gtk.Label()
+            install_info.set_markup(
+                '<b>The following will be installed:</b>\n'
+                '• Docker CE (Community Edition)\n'
+                '• Docker CLI\n'
+                '• containerd\n'
+                '• Docker Compose plugin\n'
+                '• Docker Buildx plugin\n\n'
+                '<i>You will be added to the docker group to run Docker without sudo.</i>'
+            )
+            install_info.set_xalign(0)
+            install_info.set_line_wrap(True)
+            page.pack_start(install_info, False, False, 10)
+
+        self.notebook.append_page(page, Gtk.Label(label="Welcome"))
+
+    def create_install_page(self):
+        """Create installation page with terminal output"""
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        page.set_margin_start(20)
+        page.set_margin_end(20)
+        page.set_margin_top(20)
+        page.set_margin_bottom(20)
+
+        # Title
+        title = Gtk.Label()
+        title.set_markup('<span size="large" weight="bold">Installing Docker CE</span>')
+        page.pack_start(title, False, False, 0)
+
+        # Status label
+        self.install_status = Gtk.Label()
+        self.install_status.set_markup('<i>Preparing installation...</i>')
+        self.install_status.set_xalign(0)
+        page.pack_start(self.install_status, False, False, 10)
+
+        # Terminal output
+        scrolled = Gtk.ScrolledWindow()
+        scrolled.set_vexpand(True)
+        scrolled.set_hexpand(True)
+
+        self.terminal_view = Gtk.TextView()
+        self.terminal_view.set_editable(False)
+        self.terminal_view.set_cursor_visible(False)
+        self.terminal_view.set_monospace(True)
+        self.terminal_buffer = self.terminal_view.get_buffer()
+
+        # Set terminal-like styling
+        self.terminal_view.override_background_color(
+            Gtk.StateFlags.NORMAL,
+            Gdk.RGBA(0.1, 0.1, 0.1, 1)
+        )
+        self.terminal_view.override_color(
+            Gtk.StateFlags.NORMAL,
+            Gdk.RGBA(0.9, 0.9, 0.9, 1)
+        )
+
+        scrolled.add(self.terminal_view)
+        page.pack_start(scrolled, True, True, 0)
+
+        self.notebook.append_page(page, Gtk.Label(label="Install"))
+
+    def create_completion_page(self):
+        """Create completion page"""
+        page = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
+        page.set_margin_start(40)
+        page.set_margin_end(40)
+        page.set_margin_top(40)
+        page.set_margin_bottom(40)
+
+        # Title
+        self.completion_title = Gtk.Label()
+        page.pack_start(self.completion_title, False, False, 0)
+
+        # Message
+        self.completion_message = Gtk.Label()
+        self.completion_message.set_line_wrap(True)
+        self.completion_message.set_justify(Gtk.Justification.CENTER)
+        page.pack_start(self.completion_message, False, False, 20)
+
+        # Next steps
+        self.completion_steps = Gtk.Label()
+        self.completion_steps.set_xalign(0)
+        self.completion_steps.set_line_wrap(True)
+        page.pack_start(self.completion_steps, False, False, 10)
+
+        self.notebook.append_page(page, Gtk.Label(label="Complete"))
+
+    def append_terminal_output(self, text):
+        """Append text to terminal output"""
+        end_iter = self.terminal_buffer.get_end_iter()
+        self.terminal_buffer.insert(end_iter, text)
+
+        # Auto-scroll to bottom
+        mark = self.terminal_buffer.get_insert()
+        self.terminal_view.scroll_to_mark(mark, 0.0, True, 0.0, 1.0)
+
+    def run_installation(self):
+        """Run Docker installation in background thread"""
+        self.notebook.set_current_page(1)
+        self.cancel_button.set_sensitive(False)
+        self.next_button.set_sensitive(False)
+
+        def install_docker():
+            try:
+                script_dir = os.path.dirname(os.path.abspath(__file__))
+                install_script = os.path.join(script_dir, 'install.sh')
+
+                if not os.path.exists(install_script):
+                    GLib.idle_add(self.show_error, "Installation script not found at: " + install_script)
+                    return
+
+                # Make script executable
+                os.chmod(install_script, 0o755)
+
+                GLib.idle_add(self.install_status.set_markup, '<i>Running installation script...</i>')
+                GLib.idle_add(self.append_terminal_output, f"Starting Docker CE installation...\n\n")
+
+                # Run installation script
+                process = subprocess.Popen(
+                    ['pkexec', 'bash', install_script],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1
+                )
+
+                # Stream output
+                for line in iter(process.stdout.readline, ''):
+                    if line:
+                        GLib.idle_add(self.append_terminal_output, line)
+
+                process.wait()
+
+                if process.returncode == 0:
+                    self.install_success = True
+                    GLib.idle_add(self.install_status.set_markup,
+                                '<span foreground="green"><b>✓ Installation completed successfully!</b></span>')
+                    GLib.idle_add(self.show_completion, True)
+                else:
+                    GLib.idle_add(self.install_status.set_markup,
+                                '<span foreground="red"><b>✗ Installation failed</b></span>')
+                    GLib.idle_add(self.show_completion, False)
+
+            except Exception as e:
+                GLib.idle_add(self.show_error, f"Installation error: {str(e)}")
+
+        thread = threading.Thread(target=install_docker, daemon=True)
+        thread.start()
+
+    def show_completion(self, success):
+        """Show completion page"""
+        self.notebook.set_current_page(2)
+
+        if success:
+            self.completion_title.set_markup(
+                '<span size="xx-large" weight="bold" foreground="green">✓ Installation Complete!</span>'
+            )
+            self.completion_message.set_markup(
+                '<span size="large">Docker CE has been successfully installed on your system.</span>'
+            )
+            self.completion_steps.set_markup(
+                '<b>Important Next Steps:</b>\n\n'
+                '1. <b>Log out and log back in</b> for group changes to take effect\n'
+                '2. After logging back in, you can use Docker without sudo\n'
+                '3. You can now use Docker Helper to manage your containers\n\n'
+                '<i>Click "Finish" to close this wizard and start using Docker Helper.</i>'
+            )
+            self.next_button.set_label("Finish")
+        else:
+            self.completion_title.set_markup(
+                '<span size="xx-large" weight="bold" foreground="red">✗ Installation Failed</span>'
+            )
+            self.completion_message.set_markup(
+                '<span size="large">Docker CE installation encountered errors.</span>'
+            )
+            self.completion_steps.set_markup(
+                '<b>What to do next:</b>\n\n'
+                '1. Check the terminal output above for error details\n'
+                '2. You may need to install Docker manually\n'
+                '3. Visit https://docs.docker.com/engine/install/ for manual installation instructions\n\n'
+                '<i>Click "Close" to exit the wizard.</i>'
+            )
+            self.next_button.set_label("Close")
+
+        self.next_button.set_sensitive(True)
+        self.cancel_button.set_visible(False)
+
+    def show_error(self, message):
+        """Show error message"""
+        self.install_status.set_markup(
+            f'<span foreground="red"><b>✗ Error:</b> {message}</span>'
+        )
+        self.next_button.set_sensitive(True)
+        self.cancel_button.set_sensitive(True)
+
+
+def check_docker_installed():
+    """Check if Docker is installed and accessible"""
+    try:
+        result = subprocess.run(
+            ['docker', '--version'],
+            capture_output=True,
+            timeout=5
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        return False
+
+
+def show_setup_wizard_if_needed():
+    """Show setup wizard if Docker is not installed"""
+    if not check_docker_installed():
+        wizard = DockerSetupWizard()
+
+        # Handle wizard flow
+        while True:
+            response = wizard.run()
+
+            current_page = wizard.notebook.get_current_page()
+
+            if current_page == 0:  # Welcome page
+                if response == Gtk.ResponseType.OK:
+                    # User clicked "Next" - start installation
+                    if wizard.distro_info['supported']:
+                        wizard.run_installation()
+                    else:
+                        # Unsupported distro - show manual install info
+                        wizard.show_completion(False)
+                else:
+                    # User clicked "Skip"
+                    wizard.destroy()
+                    return False
+            elif current_page == 2:  # Completion page
+                wizard.destroy()
+                return wizard.install_success
+            else:
+                continue
+
+    return True  # Docker already installed
+
+
+def main(docker_host=None):
+    # Show setup wizard if Docker is not installed
+    show_setup_wizard_if_needed()
+
+    # Continue with normal application launch
+    win = DockerManagerWindow(docker_host=docker_host)
     win.connect("destroy", Gtk.main_quit)
     win.show_all()
     Gtk.main()

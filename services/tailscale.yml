@@ -1,0 +1,41 @@
+name: tailscale
+description: "Zero config VPN - Create a secure network between your devices with WireGuard. Easier than traditional VPN, works anywhere. Perfect for accessing your home network remotely."
+image: tailscale/tailscale:latest
+
+variables:
+  - name: TAILSCALE_STATE
+    label: "State Directory"
+    type: directory
+    default: "/var/lib/tailscale"
+    container_path: "/var/lib/tailscale"
+    description: "Directory to persist Tailscale state"
+
+  - name: TAILSCALE_HOSTNAME
+    label: "Hostname"
+    type: string
+    default: "docker-host"
+    description: "Hostname for this Tailscale node"
+
+  - name: TAILSCALE_AUTHKEY
+    label: "Auth Key"
+    type: string
+    default: ""
+    description: "Tailscale auth key from https://login.tailscale.com/admin/settings/keys (leave empty to auth via web)"
+
+  - name: TS_ROUTES
+    label: "Advertised Routes"
+    type: string
+    default: ""
+    description: "Comma-separated routes to advertise (e.g., 192.168.1.0/24,10.0.0.0/8)"
+
+  - name: TS_ACCEPT_ROUTES
+    label: "Accept Routes"
+    type: boolean
+    default: true
+    description: "Accept routes advertised by other Tailscale nodes"
+
+  - name: TS_EXTRA_ARGS
+    label: "Extra Arguments"
+    type: string
+    default: ""
+    description: "Additional arguments for tailscale up command"

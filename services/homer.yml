@@ -1,0 +1,32 @@
+name: homer
+description: "Homer is a very simple static homepage for your server to keep your services on hand, from a simple yaml configuration file."
+image: b4bz/homer:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: INIT_ASSETS
+    label: "Initialize Assets"
+    type: string
+    default: "1"
+    description: "Set to 1 to copy default assets to the config directory on first run."
+  - name: HOMER_CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/www/assets"
+    description: "The host path to store Homer's configuration and assets."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for Homer web interface."

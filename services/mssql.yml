@@ -1,0 +1,37 @@
+name: mssql
+description: "Microsoft SQL Server is a relational database management system developed by Microsoft. This is the Linux-based container version."
+image: mcr.microsoft.com/mssql/server:2022-latest
+
+variables:
+  - name: ACCEPT_EULA
+    label: "Accept EULA"
+    type: string
+    default: "Y"
+    description: "Set to 'Y' to accept the Microsoft SQL Server End-User License Agreement."
+  - name: MSSQL_SA_PASSWORD
+    label: "SA Password"
+    type: string
+    default: "YourStrong@Passw0rd"
+    description: "The system administrator (SA) password. Must be at least 8 characters with uppercase, lowercase, digits, and symbols. CHANGE THIS."
+  - name: MSSQL_PID
+    label: "Product ID"
+    type: string
+    default: "Developer"
+    description: "The edition of SQL Server (Developer, Express, Standard, Enterprise, or a product key)."
+  - name: MSSQL_COLLATION
+    label: "Collation"
+    type: string
+    default: "SQL_Latin1_General_CP1_CI_AS"
+    description: "The default collation for SQL Server."
+  - name: MSSQL_DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/var/opt/mssql"
+    description: "The host path to store SQL Server's data and log files."
+
+ports:
+  - name: "Database"
+    host: 1433
+    container: 1433
+    protocol: "tcp"
+    description: "The port for connecting to the SQL Server instance."

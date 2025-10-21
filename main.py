@@ -1,9 +1,12 @@
 import argparse
 import core
+import config
 
 def main():
     parser = argparse.ArgumentParser(description='A Docker management tool with reverse proxy capabilities.')
     parser.add_argument('--gui', action='store_true', help='Launch the GTK GUI.')
+    parser.add_argument('--host', '-H', dest='docker_host',
+                        help='Docker host to connect to (e.g., ssh://user@host, ssh://user@host:port, tcp://host:port, or a saved remote name)')
     subparsers = parser.add_subparsers(dest='action')
 
     install_parser = subparsers.add_parser('install', help='Install services.')
@@ -33,19 +36,104 @@ def main():
 
     test_parser = subparsers.add_parser('test', help='Run a test container.')
 
+    # Remote host management
+    remote_parser = subparsers.add_parser('remote', help='Manage remote Docker hosts.')
+    remote_subparsers = remote_parser.add_subparsers(dest='remote_action')
+
+    add_remote_parser = remote_subparsers.add_parser('add', help='Add a remote Docker host.')
+    add_remote_parser.add_argument('name', help='Name/alias for the remote host.')
+    add_remote_parser.add_argument('host', help='Hostname or IP address.')
+    add_remote_parser.add_argument('--user', help='SSH username (default: current user).')
+    add_remote_parser.add_argument('--port', type=int, default=22, help='SSH port (default: 22).')
+    add_remote_parser.add_argument('--description', help='Optional description.')
+
+    remove_remote_parser = remote_subparsers.add_parser('remove', help='Remove a remote Docker host.')
+    remove_remote_parser.add_argument('name', help='Name/alias of the remote host to remove.')
+
+    list_remote_parser = remote_subparsers.add_parser('list', help='List all remote Docker hosts.')
+
+    set_default_parser = remote_subparsers.add_parser('set-default', help='Set default Docker host.')
+    set_default_parser.add_argument('name', nargs='?', help='Name of remote host (omit for local).')
+
     args = parser.parse_args()
 
     if args.gui:
         import gui
-        gui.main()
+        gui.main(docker_host=args.docker_host)
         return
 
     if not args.action:
         parser.print_help()
         return
 
+    # Handle remote host management commands
+    if args.action == 'remote':
+        if args.remote_action == 'add':
+            try:
+                config.add_remote_host(
+                    args.name,
+                    args.host,
+                    port=args.port,
+                    user=args.user,
+                    description=args.description
+                )
+                print(f"Remote host '{args.name}' added successfully.")
+            except Exception as e:
+                print(f"Error adding remote host: {e}")
+            return
+        elif args.remote_action == 'remove':
+            try:
+                config.remove_remote_host(args.name)
+                print(f"Remote host '{args.name}' removed successfully.")
+            except Exception as e:
+                print(f"Error removing remote host: {e}")
+            return
+        elif args.remote_action == 'list':
+            remote_hosts = config.list_remote_hosts()
+            if not remote_hosts:
+                print("No remote hosts configured.")
+            else:
+                print("Configured remote hosts:")
+                for name, info in remote_hosts.items():
+                    print(f"\n  {name}:")
+                    print(f"    Host: {info['host']}")
+                    print(f"    User: {info['user']}")
+                    print(f"    Port: {info['port']}")
+                    print(f"    Connection: {info['docker_host']}")
+                    if info.get('description'):
+                        print(f"    Description: {info['description']}")
+            return
+        elif args.remote_action == 'set-default':
+            try:
+                config.set_default_host(args.name)
+                if args.name:
+                    print(f"Default host set to '{args.name}'.")
+                else:
+                    print("Default host set to local.")
+            except Exception as e:
+                print(f"Error setting default host: {e}")
+            return
+        else:
+            remote_parser.print_help()
+            return
+
+    # Resolve docker host (command line arg, saved remote name, or config default)
+    docker_host = args.docker_host
+    if docker_host:
+        # Check if it's a saved remote name
+        try:
+            docker_host = config.get_remote_host(docker_host)
+        except ValueError:
+            # Not a saved name, treat as direct connection string
+            pass
+    else:
+        # Use default from config
+        docker_host = config.get_default_host()
+
     try:
-        client = core.get_client()
+        client = core.get_client(docker_host=docker_host)
+        if docker_host:
+            print(f"Connected to Docker host: {docker_host}")
     except ConnectionError as e:
         print(e)
         return

@@ -1,0 +1,52 @@
+name: neo4j
+description: "Neo4j is a graph database management system developed by Neo4j, Inc. It is an ACID-compliant transactional database with native graph storage and processing."
+image: neo4j:latest
+
+variables:
+  - name: NEO4J_AUTH
+    label: "Authentication"
+    type: string
+    default: "neo4j/changeme"
+    description: "Username and password in the format 'username/password'. CHANGE THIS."
+  - name: NEO4J_ACCEPT_LICENSE_AGREEMENT
+    label: "Accept License"
+    type: string
+    default: "yes"
+    description: "Set to 'yes' to accept the Neo4j license agreement."
+  - name: NEO4J_dbms_memory_pagecache_size
+    label: "Page Cache Size"
+    type: string
+    default: "512M"
+    description: "The amount of memory to use for mapping the store files."
+  - name: NEO4J_dbms_memory_heap_max__size
+    label: "Max Heap Size"
+    type: string
+    default: "512M"
+    description: "The maximum heap size for the JVM."
+  - name: NEO4J_DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/data"
+    description: "The host path to store Neo4j's data."
+  - name: NEO4J_LOGS_PATH
+    label: "Logs Path"
+    type: path
+    default: "/logs"
+    description: "The host path to store Neo4j's logs."
+
+ports:
+  - name: "HTTP"
+    host: 7474
+    container: 7474
+    protocol: "tcp"
+    description: "The port for HTTP browser interface."
+  - name: "HTTPS"
+    host: 7473
+    container: 7473
+    protocol: "tcp"
+    description: "The port for HTTPS browser interface."
+  - name: "Bolt"
+    host: 7687
+    container: 7687
+    protocol: "tcp"
+    description: "The port for Bolt protocol (native driver connections)."

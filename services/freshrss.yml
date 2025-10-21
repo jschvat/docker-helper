@@ -1,0 +1,36 @@
+name: freshrss
+description: "A free, self-hostable RSS feed aggregator. Stay up to date with your favorite websites, blogs, and news sources in one place."
+image: lscr.io/linuxserver/freshrss:latest
+
+variables:
+  - name: PUID
+    label: "User ID"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions"
+
+  - name: PGID
+    label: "Group ID"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions"
+
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+  - name: FRESHRSS_CONFIG
+    label: "Config Directory"
+    type: directory
+    default: "/var/lib/freshrss"
+    container_path: "/config"
+    description: "Directory for FreshRSS configuration and database"
+
+ports:
+  - name: HTTP
+    host: 8081
+    container: 80
+    protocol: tcp
+    description: "Web interface for FreshRSS"

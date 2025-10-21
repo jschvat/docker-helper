@@ -1,0 +1,24 @@
+name: esphome
+description: "System to control ESP8266/ESP32 devices with YAML configuration. Perfect for DIY smart home projects with Home Assistant integration."
+image: ghcr.io/esphome/esphome:latest
+
+variables:
+  - name: ESPHOME_CONFIG
+    label: "Config Directory"
+    type: directory
+    default: "/var/lib/esphome"
+    container_path: "/config"
+    description: "Directory for ESPHome configuration files"
+
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+ports:
+  - name: WEB_UI
+    host: 6052
+    container: 6052
+    protocol: tcp
+    description: "Web interface for ESPHome dashboard"

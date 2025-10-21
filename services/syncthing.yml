@@ -1,52 +1,68 @@
 name: syncthing
-description: "Syncthing is a continuous file synchronization program. It synchronizes files between two or more computers in real time, safely protected from prying eyes."
-image: linuxserver/syncthing:latest
+description: "Continuous file synchronization between devices. Open source, peer-to-peer file sync without cloud storage. Perfect for keeping files in sync across multiple computers."
+image: lscr.io/linuxserver/syncthing:latest
 
 variables:
   - name: PUID
-    label: "User ID (PUID)"
+    label: "User ID"
     type: number
     default: 1000
-    description: "The user ID for file permissions."
+    description: "The user ID for file permissions"
+
   - name: PGID
-    label: "Group ID (PGID)"
+    label: "Group ID"
     type: number
     default: 1000
-    description: "The group ID for file permissions."
+    description: "The group ID for file permissions"
+
   - name: TZ
     label: "Timezone"
     type: string
-    default: "Etc/UTC"
-    description: "The timezone for the container, e.g., America/New_York."
-  - name: CONFIG_PATH
-    label: "Config Path"
-    type: path
-    default: "/config"
-    description: "Host path for Syncthing configuration files."
-  - name: DATA_PATH
-    label: "Data Path"
-    type: path
-    default: "/data"
-    description: "Host path for the files you want to sync."
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+  - name: SYNCTHING_CONFIG
+    label: "Config Directory"
+    type: directory
+    default: "/var/lib/syncthing/config"
+    container_path: "/config"
+    description: "Directory for Syncthing configuration"
+
+  - name: SYNCTHING_DATA1
+    label: "Sync Directory 1"
+    type: directory
+    default: "/home/user/Sync"
+    container_path: "/data1"
+    description: "First directory to sync"
+
+  - name: SYNCTHING_DATA2
+    label: "Sync Directory 2 (Optional)"
+    type: directory
+    default: ""
+    container_path: "/data2"
+    description: "Second directory to sync (optional)"
 
 ports:
-  - name: "WebUI"
+  - name: WEB_UI
     host: 8384
     container: 8384
-    protocol: "tcp"
-    description: "The port for the Syncthing web interface."
-  - name: "Sync_TCP"
+    protocol: tcp
+    description: "Web interface for Syncthing"
+
+  - name: SYNC_PROTOCOL_TCP
     host: 22000
     container: 22000
-    protocol: "tcp"
-    description: "The port for Syncthing to communicate with other peers."
-  - name: "Sync_UDP"
+    protocol: tcp
+    description: "Syncthing sync protocol (TCP)"
+
+  - name: SYNC_PROTOCOL_UDP
     host: 22000
     container: 22000
-    protocol: "udp"
-    description: "The port for Syncthing to communicate with other peers (UDP)."
-  - name: "Discovery"
+    protocol: udp
+    description: "Syncthing sync protocol (UDP/QUIC)"
+
+  - name: DISCOVERY
     host: 21027
     container: 21027
-    protocol: "udp"
-    description: "The port for local discovery."
+    protocol: udp
+    description: "Local discovery broadcasts"

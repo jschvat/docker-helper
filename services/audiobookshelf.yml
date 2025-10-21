@@ -1,47 +1,45 @@
 name: audiobookshelf
-description: "A self-hosted audiobook and podcast server."
+description: "Self-hosted audiobook and podcast server with a clean web interface and mobile apps. Perfect for managing and streaming your audiobook collection."
 image: ghcr.io/advplyr/audiobookshelf:latest
 
 variables:
-  - name: PUID
-    label: "User ID (PUID)"
-    type: number
-    default: 1000
-    description: "The user ID for file permissions."
-  - name: PGID
-    label: "Group ID (PGID)"
-    type: number
-    default: 1000
-    description: "The group ID for file permissions."
+  - name: AUDIOBOOKSHELF_CONFIG
+    label: "Config Directory"
+    type: directory
+    default: "/var/lib/audiobookshelf/config"
+    container_path: "/config"
+    description: "Directory for Audiobookshelf configuration and database"
+
+  - name: AUDIOBOOKSHELF_METADATA
+    label: "Metadata Directory"
+    type: directory
+    default: "/var/lib/audiobookshelf/metadata"
+    container_path: "/metadata"
+    description: "Directory for book covers and metadata"
+
+  - name: AUDIOBOOKS_DIR
+    label: "Audiobooks Directory"
+    type: directory
+    default: "/media/audiobooks"
+    container_path: "/audiobooks"
+    description: "Directory containing your audiobook files"
+
+  - name: PODCASTS_DIR
+    label: "Podcasts Directory"
+    type: directory
+    default: "/media/podcasts"
+    container_path: "/podcasts"
+    description: "Directory for podcast downloads"
+
   - name: TZ
     label: "Timezone"
     type: string
-    default: "Etc/UTC"
-    description: "The timezone for the container, e.g., America/New_York."
-  - name: AUDIOBOOKS_PATH
-    label: "Audiobooks Path"
-    type: path
-    default: "/audiobooks"
-    description: "The host path to your audiobook library."
-  - name: PODCASTS_PATH
-    label: "Podcasts Path"
-    type: path
-    default: "/podcasts"
-    description: "The host path to your podcast library."
-  - name: CONFIG_PATH
-    label: "Config Path"
-    type: path
-    default: "/config"
-    description: "The host path to store Audiobookshelf's configuration."
-  - name: METADATA_PATH
-    label: "Metadata Path"
-    type: path
-    default: "/metadata"
-    description: "The host path to store Audiobookshelf's metadata."
+    default: "America/New_York"
+    description: "Timezone for the container"
 
 ports:
-  - name: "WebUI"
+  - name: WEB_UI
     host: 13378
     container: 80
-    protocol: "tcp"
-    description: "The port for the Audiobookshelf web interface."
+    protocol: tcp
+    description: "Web interface for Audiobookshelf"

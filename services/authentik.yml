@@ -1,0 +1,73 @@
+name: authentik
+description: "Open-source Identity Provider (IdP) and Single Sign-On (SSO) solution. Manage user authentication and authorization for all your applications in one place."
+image: ghcr.io/goauthentik/server:latest
+
+variables:
+  - name: AUTHENTIK_REDIS_HOST
+    label: "Redis Host"
+    type: string
+    default: "redis"
+    description: "Redis hostname (requires separate Redis container)"
+
+  - name: AUTHENTIK_POSTGRESQL_HOST
+    label: "PostgreSQL Host"
+    type: string
+    default: "postgresql"
+    description: "PostgreSQL hostname (requires separate PostgreSQL container)"
+
+  - name: AUTHENTIK_POSTGRESQL_NAME
+    label: "Database Name"
+    type: string
+    default: "authentik"
+    description: "PostgreSQL database name"
+
+  - name: AUTHENTIK_POSTGRESQL_USER
+    label: "Database User"
+    type: string
+    default: "authentik"
+    description: "PostgreSQL database user"
+
+  - name: AUTHENTIK_POSTGRESQL_PASSWORD
+    label: "Database Password"
+    type: string
+    default: "changeme"
+    description: "PostgreSQL database password (CHANGE THIS!)"
+
+  - name: AUTHENTIK_SECRET_KEY
+    label: "Secret Key"
+    type: string
+    default: ""
+    description: "Secret key for encryption (generate with: openssl rand -base64 32)"
+
+  - name: AUTHENTIK_ERROR_REPORTING_ENABLED
+    label: "Error Reporting"
+    type: boolean
+    default: false
+    description: "Enable anonymous error reporting to authentik developers"
+
+  - name: AUTHENTIK_MEDIA
+    label: "Media Directory"
+    type: directory
+    default: "/var/lib/authentik/media"
+    container_path: "/media"
+    description: "Directory for uploaded media files"
+
+  - name: AUTHENTIK_TEMPLATES
+    label: "Custom Templates Directory"
+    type: directory
+    default: "/var/lib/authentik/templates"
+    container_path: "/templates"
+    description: "Directory for custom email/page templates"
+
+ports:
+  - name: HTTP
+    host: 9000
+    container: 9000
+    protocol: tcp
+    description: "HTTP interface for Authentik"
+
+  - name: HTTPS
+    host: 9443
+    container: 9443
+    protocol: tcp
+    description: "HTTPS interface for Authentik"

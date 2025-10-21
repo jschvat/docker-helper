@@ -18,11 +18,11 @@ variables:
     type: string
     default: "postgres"
     description: "The name of the default database to create."
-  - name: PGDATA
-    label: "Data Path"
+  - name: DATA_VOLUME
+    label: "Data Directory"
     type: path
-    default: "/var/lib/postgresql/data"
-    description: "The host path to store PostgreSQL's data."
+    default: "/var/lib/postgresql"
+    description: "Host path to store PostgreSQL's data. (PostgreSQL 18+ mounts at /var/lib/postgresql)"
 
 ports:
   - name: "Database"

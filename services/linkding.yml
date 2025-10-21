@@ -1,0 +1,36 @@
+name: linkding
+description: "Self-hosted bookmark manager with tagging, search, and archive. Minimalist, fast, and privacy-focused alternative to browser bookmarks."
+image: sissbruecker/linkding:latest
+
+variables:
+  - name: LINKDING_DATA
+    label: "Data Directory"
+    type: directory
+    default: "/var/lib/linkding"
+    container_path: "/etc/linkding/data"
+    description: "Directory for Linkding database and data"
+
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+  - name: LD_SUPERUSER_NAME
+    label: "Admin Username"
+    type: string
+    default: "admin"
+    description: "Initial admin username"
+
+  - name: LD_SUPERUSER_PASSWORD
+    label: "Admin Password"
+    type: string
+    default: "changeme"
+    description: "Initial admin password (CHANGE THIS!)"
+
+ports:
+  - name: WEB_UI
+    host: 9090
+    container: 9090
+    protocol: tcp
+    description: "Web interface for Linkding"

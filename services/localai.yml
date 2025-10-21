@@ -1,0 +1,36 @@
+name: localai
+description: "Drop-in replacement for OpenAI API running locally. Run LLMs (like GPT, Llama, Mistral) on your own hardware with OpenAI-compatible API. No GPU required."
+image: quay.io/go-skynet/local-ai:latest
+
+variables:
+  - name: LOCALAI_MODELS
+    label: "Models Directory"
+    type: directory
+    default: "/var/lib/localai/models"
+    container_path: "/models"
+    description: "Directory to store downloaded AI models"
+
+  - name: THREADS
+    label: "CPU Threads"
+    type: number
+    default: 4
+    description: "Number of CPU threads to use for inference"
+
+  - name: CONTEXT_SIZE
+    label: "Context Size"
+    type: number
+    default: 512
+    description: "Context size for model inference (higher = more memory)"
+
+  - name: DEBUG
+    label: "Enable Debug Logging"
+    type: boolean
+    default: false
+    description: "Enable verbose debug logging"
+
+ports:
+  - name: API
+    host: 8080
+    container: 8080
+    protocol: tcp
+    description: "OpenAI-compatible API endpoint"

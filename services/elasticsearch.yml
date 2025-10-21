@@ -1,0 +1,42 @@
+name: elasticsearch
+description: "Elasticsearch is a distributed, RESTful search and analytics engine capable of addressing a growing number of use cases."
+image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+
+variables:
+  - name: ELASTIC_PASSWORD
+    label: "Elastic Password"
+    type: string
+    default: "changeme"
+    description: "Password for the 'elastic' user. CHANGE THIS."
+  - name: discovery.type
+    label: "Discovery Type"
+    type: string
+    default: "single-node"
+    description: "Set to 'single-node' for a single-node cluster."
+  - name: xpack.security.enabled
+    label: "Security Enabled"
+    type: string
+    default: "true"
+    description: "Enable or disable X-Pack security features."
+  - name: ES_JAVA_OPTS
+    label: "Java Options"
+    type: string
+    default: "-Xms512m -Xmx512m"
+    description: "JVM heap size settings. Adjust based on available memory."
+  - name: ES_DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/usr/share/elasticsearch/data"
+    description: "The host path to store Elasticsearch's data."
+
+ports:
+  - name: "HTTP API"
+    host: 9200
+    container: 9200
+    protocol: "tcp"
+    description: "The port for HTTP API access to Elasticsearch."
+  - name: "Transport"
+    host: 9300
+    container: 9300
+    protocol: "tcp"
+    description: "The port for inter-node communication."

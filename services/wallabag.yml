@@ -1,0 +1,30 @@
+name: wallabag
+description: "Self-hosted read-it-later application. Save web articles to read later, offline, ad-free. Like Pocket or Instapaper but self-hosted."
+image: wallabag/wallabag:latest
+
+variables:
+  - name: WALLABAG_DATA
+    label: "Data Directory"
+    type: directory
+    default: "/var/lib/wallabag"
+    container_path: "/var/www/wallabag/data"
+    description: "Directory for Wallabag database and images"
+
+  - name: SYMFONY__ENV__DOMAIN_NAME
+    label: "Domain Name"
+    type: string
+    default: "http://localhost:8083"
+    description: "Full URL where Wallabag will be accessible"
+
+  - name: SYMFONY__ENV__DATABASE_DRIVER
+    label: "Database Driver"
+    type: string
+    default: "pdo_sqlite"
+    description: "Database type (pdo_sqlite, pdo_mysql, pdo_pgsql)"
+
+ports:
+  - name: HTTP
+    host: 8083
+    container: 80
+    protocol: tcp
+    description: "Web interface for Wallabag"

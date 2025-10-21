@@ -1,5 +1,5 @@
 name: memcached
-description: "Memcached is a free & open source, high-performance, distributed memory object caching system, generic in nature, but intended for use in speeding up dynamic web applications by alleviating database load."
+description: "Memcached is a free and open source, high-performance, distributed memory object caching system, generic in nature, but intended for use in speeding up dynamic web applications by alleviating database load."
 image: memcached:latest
 
 variables:

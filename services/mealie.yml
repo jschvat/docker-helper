@@ -1,0 +1,36 @@
+name: mealie
+description: "Recipe manager and meal planner with shopping lists, meal planning calendar, and recipe import from websites. Beautiful modern interface."
+image: ghcr.io/mealie-recipes/mealie:latest
+
+variables:
+  - name: MEALIE_DATA
+    label: "Data Directory"
+    type: directory
+    default: "/var/lib/mealie"
+    container_path: "/app/data"
+    description: "Directory for Mealie database and recipe data"
+
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+  - name: BASE_URL
+    label: "Base URL"
+    type: string
+    default: "http://localhost:9925"
+    description: "Base URL for Mealie (include http:// or https://)"
+
+  - name: ALLOW_SIGNUP
+    label: "Allow User Signup"
+    type: boolean
+    default: true
+    description: "Allow new users to sign up (disable after creating admin)"
+
+ports:
+  - name: WEB_UI
+    host: 9925
+    container: 9000
+    protocol: tcp
+    description: "Web interface for Mealie"

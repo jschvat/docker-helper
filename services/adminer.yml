@@ -1,0 +1,27 @@
+name: adminer
+description: "Adminer (formerly phpMinAdmin) is a full-featured database management tool written in PHP. It supports MySQL, MariaDB, PostgreSQL, SQLite, MS SQL, Oracle, Elasticsearch, MongoDB and more."
+image: adminer:latest
+
+variables:
+  - name: ADMINER_DEFAULT_SERVER
+    label: "Default Server"
+    type: string
+    default: ""
+    description: "(Optional) The default database server to connect to."
+  - name: ADMINER_DESIGN
+    label: "Design Theme"
+    type: string
+    default: "pepa-linha"
+    description: "The design theme for Adminer (e.g., pepa-linha, nette, pappu687)."
+  - name: ADMINER_PLUGINS
+    label: "Plugins"
+    type: string
+    default: ""
+    description: "(Optional) Space-separated list of plugins to enable."
+
+ports:
+  - name: "WebUI"
+    host: 8080
+    container: 8080
+    protocol: "tcp"
+    description: "The port for Adminer web interface."

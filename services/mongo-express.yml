@@ -1,0 +1,42 @@
+name: mongo-express
+description: "Mongo Express is a web-based MongoDB admin interface written in Node.js, Express.js, and Bootstrap3."
+image: mongo-express:latest
+
+variables:
+  - name: ME_CONFIG_MONGODB_SERVER
+    label: "MongoDB Server"
+    type: string
+    default: "mongodb"
+    description: "The hostname or IP of the MongoDB server."
+  - name: ME_CONFIG_MONGODB_PORT
+    label: "MongoDB Port"
+    type: number
+    default: 27017
+    description: "The port of the MongoDB server."
+  - name: ME_CONFIG_MONGODB_ADMINUSERNAME
+    label: "MongoDB Admin Username"
+    type: string
+    default: "admin"
+    description: "The admin username for MongoDB."
+  - name: ME_CONFIG_MONGODB_ADMINPASSWORD
+    label: "MongoDB Admin Password"
+    type: string
+    default: "changeme"
+    description: "The admin password for MongoDB. CHANGE THIS."
+  - name: ME_CONFIG_BASICAUTH_USERNAME
+    label: "Basic Auth Username"
+    type: string
+    default: "admin"
+    description: "Username for HTTP basic authentication."
+  - name: ME_CONFIG_BASICAUTH_PASSWORD
+    label: "Basic Auth Password"
+    type: string
+    default: "changeme"
+    description: "Password for HTTP basic authentication. CHANGE THIS."
+
+ports:
+  - name: "WebUI"
+    host: 8081
+    container: 8081
+    protocol: "tcp"
+    description: "The port for Mongo Express web interface."

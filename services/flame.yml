@@ -1,0 +1,22 @@
+name: flame
+description: "Flame is a self-hosted startpage for your server. Its design is inspired (heavily) by SUI. Flame is very easy to setup and use. With built-in editors, it allows you to setup your very own application hub in no time."
+image: pawelmalak/flame:latest
+
+variables:
+  - name: PASSWORD
+    label: "Admin Password"
+    type: string
+    default: "changeme"
+    description: "The password for the admin user. CHANGE THIS."
+  - name: FLAME_DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/app/data"
+    description: "The host path to store Flame's data and configuration."
+
+ports:
+  - name: "WebUI"
+    host: 5005
+    container: 5005
+    protocol: "tcp"
+    description: "The port for Flame web interface."

@@ -1,0 +1,27 @@
+name: webmin
+description: "Webmin is a web-based interface for system administration for Unix. Using any modern web browser, you can setup user accounts, Apache, DNS, file sharing and much more."
+image: webmin/webmin:latest
+
+variables:
+  - name: WEBMIN_ENABLED
+    label: "Webmin Enabled"
+    type: string
+    default: "1"
+    description: "Enable Webmin service."
+  - name: WEBMIN_INIT_SSL_ENABLED
+    label: "SSL Enabled"
+    type: string
+    default: "1"
+    description: "Enable SSL/HTTPS for Webmin."
+  - name: WEBMIN_INIT_REDIRECT_PORT
+    label: "Redirect Port"
+    type: string
+    default: "10000"
+    description: "The port to redirect HTTP to HTTPS."
+
+ports:
+  - name: "WebUI"
+    host: 10000
+    container: 10000
+    protocol: "tcp"
+    description: "The port for Webmin web interface."

@@ -1,0 +1,30 @@
+name: zigbee2mqtt
+description: "Zigbee to MQTT bridge - Control Zigbee devices without proprietary hubs. Works with Home Assistant and supports 2000+ Zigbee devices."
+image: koenkk/zigbee2mqtt:latest
+
+variables:
+  - name: ZIGBEE2MQTT_DATA
+    label: "Data Directory"
+    type: directory
+    default: "/var/lib/zigbee2mqtt"
+    container_path: "/app/data"
+    description: "Directory for Zigbee2MQTT configuration and database"
+
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+  - name: ZIGBEE_ADAPTER
+    label: "Zigbee Adapter Device"
+    type: string
+    default: "/dev/ttyACM0"
+    description: "Path to Zigbee adapter (e.g., /dev/ttyACM0, /dev/ttyUSB0)"
+
+ports:
+  - name: WEB_UI
+    host: 8080
+    container: 8080
+    protocol: tcp
+    description: "Web interface for Zigbee2MQTT"

@@ -1,0 +1,17 @@
+name: cockpit
+description: "Cockpit is a web-based graphical interface for servers, allowing you to manage and monitor your system through a browser."
+image: cockpit/ws:latest
+
+variables:
+  - name: COCKPIT_PORT
+    label: "Cockpit Port"
+    type: number
+    default: 9090
+    description: "The port for the Cockpit web interface."
+
+ports:
+  - name: "WebUI"
+    host: 9090
+    container: 9090
+    protocol: "tcp"
+    description: "The port for Cockpit web interface."

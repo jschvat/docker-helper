@@ -7,13 +7,52 @@ import random
 # Set up logging
 logging.basicConfig(filename='docker_helper.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def get_client():
+def get_client(docker_host=None):
+    """
+    Get a Docker client, either local or remote via SSH.
+
+    Args:
+        docker_host: Optional Docker host connection string. Supports:
+            - None: Connect to local Docker daemon (default)
+            - "ssh://user@host": Connect via SSH (uses SSH keys)
+            - "ssh://user@host:port": Connect via SSH with custom port
+            - "unix:///var/run/docker.sock": Local socket (explicit)
+            - "tcp://host:port": TCP connection
+
+    Returns:
+        Docker client instance
+
+    Raises:
+        ConnectionError: If connection fails
+    """
     try:
-        client = docker.from_env()
+        if docker_host:
+            # Connect to remote or specific host
+            logging.info(f"Connecting to Docker host: {docker_host}")
+            client = docker.DockerClient(base_url=docker_host)
+            # Test connection
+            client.ping()
+            logging.info(f"Successfully connected to Docker host: {docker_host}")
+
+            # Verify connection by getting server info
+            info = client.info()
+            logging.info(f"Connected to Docker daemon. Server name: {info.get('Name', 'Unknown')}")
+        else:
+            # Connect to local Docker daemon
+            client = docker.from_env()
+            logging.info("Connected to local Docker daemon")
+
+            # Verify connection
+            info = client.info()
+            logging.info(f"Connected to local Docker daemon. Server name: {info.get('Name', 'Unknown')}")
+
         return client
     except docker.errors.DockerException as e:
         logging.error(f"Error connecting to Docker: {e}")
-        raise ConnectionError("Error connecting to Docker. Please make sure Docker is running.")
+        if docker_host:
+            raise ConnectionError(f"Error connecting to Docker at {docker_host}. Please check the connection and ensure Docker is running.")
+        else:
+            raise ConnectionError("Error connecting to Docker. Please make sure Docker is running.")
 
 def handle_configure(token, domain):
     with open('duckdns.yml', 'w') as f:
@@ -40,8 +79,12 @@ def install_service(service_config, config_values):
     try:
         command = ["docker", "run", "-d"]
 
-        service_name = service_config.get('name', 'default-service-name')
-        command.extend(["--name", service_name])
+        # Use custom container name if provided, otherwise use service name
+        container_name = config_values.get('container_name')
+        if not container_name:
+            container_name = service_config.get('name', 'default-service-name')
+
+        command.extend(["--name", container_name])
 
         # Process variables (environment and volumes)
         for var in service_config.get('variables', []):

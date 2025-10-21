@@ -1,0 +1,36 @@
+name: changedetection
+description: "Website change detection and monitoring. Get notifications when websites change. Perfect for tracking price drops, stock availability, or content updates."
+image: ghcr.io/dgtlmoon/changedetection.io:latest
+
+variables:
+  - name: CHANGEDETECTION_DATA
+    label: "Data Directory"
+    type: directory
+    default: "/var/lib/changedetection"
+    container_path: "/datastore"
+    description: "Directory for changedetection configuration and data"
+
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+  - name: BASE_URL
+    label: "Base URL"
+    type: string
+    default: ""
+    description: "Base URL if behind reverse proxy (optional)"
+
+  - name: PLAYWRIGHT_DRIVER_URL
+    label: "Playwright Driver URL"
+    type: string
+    default: ""
+    description: "URL for Playwright/Chrome for JavaScript rendering (optional)"
+
+ports:
+  - name: WEB_UI
+    host: 5000
+    container: 5000
+    protocol: tcp
+    description: "Web interface for Changedetection.io"

@@ -1,0 +1,44 @@
+name: caddy
+description: "Fast, multi-platform web server with automatic HTTPS. Simple configuration, automatic SSL certificate management with Let's Encrypt. Perfect reverse proxy and file server."
+image: caddy:latest
+
+variables:
+  - name: CADDY_CONFIG
+    label: "Config Directory"
+    type: directory
+    default: "/etc/caddy"
+    container_path: "/config"
+    description: "Directory containing Caddyfile and configuration"
+
+  - name: CADDY_DATA
+    label: "Data Directory"
+    type: directory
+    default: "/var/lib/caddy/data"
+    container_path: "/data"
+    description: "Directory for SSL certificates and runtime data"
+
+  - name: SITE_DIR
+    label: "Site Directory"
+    type: directory
+    default: "/var/www/html"
+    container_path: "/srv"
+    description: "Directory containing website files to serve"
+
+ports:
+  - name: HTTP
+    host: 80
+    container: 80
+    protocol: tcp
+    description: "HTTP port (auto-redirects to HTTPS)"
+
+  - name: HTTPS
+    host: 443
+    container: 443
+    protocol: tcp
+    description: "HTTPS port with automatic SSL"
+
+  - name: ADMIN_API
+    host: 2019
+    container: 2019
+    protocol: tcp
+    description: "Caddy admin API (optional)"

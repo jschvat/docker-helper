@@ -1,0 +1,27 @@
+name: homepage
+description: "Homepage is a modern, fully static, fast, secure fully proxied, highly customizable application dashboard with integrations for over 100 services and translations into multiple languages."
+image: ghcr.io/gethomepage/homepage:latest
+
+variables:
+  - name: PUID
+    label: "User ID (PUID)"
+    type: number
+    default: 1000
+    description: "The user ID for file permissions."
+  - name: PGID
+    label: "Group ID (PGID)"
+    type: number
+    default: 1000
+    description: "The group ID for file permissions."
+  - name: HOMEPAGE_CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/app/config"
+    description: "The host path to store Homepage's configuration files."
+
+ports:
+  - name: "WebUI"
+    host: 3000
+    container: 3000
+    protocol: "tcp"
+    description: "The port for Homepage web interface."

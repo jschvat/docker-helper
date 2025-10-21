@@ -1,0 +1,17 @@
+name: it-tools
+description: "Handy collection of tools for developers and IT professionals. Includes encoders, formatters, generators, converters, and more - all in one place."
+image: corentinth/it-tools:latest
+
+variables:
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+ports:
+  - name: WEB_UI
+    host: 8084
+    container: 80
+    protocol: tcp
+    description: "Web interface for IT-Tools"

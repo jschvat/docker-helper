@@ -1,0 +1,42 @@
+name: couchdb
+description: "Apache CouchDB is an open-source document-oriented NoSQL database that uses JSON for documents, JavaScript for MapReduce indexes, and regular HTTP for its API."
+image: couchdb:latest
+
+variables:
+  - name: COUCHDB_USER
+    label: "Admin User"
+    type: string
+    default: "admin"
+    description: "The admin username for CouchDB."
+  - name: COUCHDB_PASSWORD
+    label: "Admin Password"
+    type: string
+    default: "changeme"
+    description: "The admin password for CouchDB. CHANGE THIS."
+  - name: COUCHDB_SECRET
+    label: "Secret"
+    type: string
+    default: ""
+    description: "(Optional) A secret token for cookie authentication. Will be generated if not set."
+  - name: COUCHDB_DATA_PATH
+    label: "Data Path"
+    type: path
+    default: "/opt/couchdb/data"
+    description: "The host path to store CouchDB's data."
+  - name: COUCHDB_CONFIG_PATH
+    label: "Config Path"
+    type: path
+    default: "/opt/couchdb/etc"
+    description: "The host path to store CouchDB's configuration files."
+
+ports:
+  - name: "HTTP API"
+    host: 5984
+    container: 5984
+    protocol: "tcp"
+    description: "The port for HTTP API access to CouchDB."
+  - name: "HTTPS API"
+    host: 6984
+    container: 6984
+    protocol: "tcp"
+    description: "The port for HTTPS API access to CouchDB."

@@ -1,62 +1,72 @@
 name: wireguard
-description: "WireGuard is a fast, modern, and secure VPN tunnel."
+description: "WireGuard VPN server - Fast, modern, secure VPN tunnel. Create your own VPN to securely access your network from anywhere."
 image: linuxserver/wireguard:latest
 
 variables:
   - name: PUID
-    label: "User ID (PUID)"
+    label: "User ID"
     type: number
     default: 1000
-    description: "The user ID for file permissions."
+    description: "The user ID for file permissions"
+
   - name: PGID
-    label: "Group ID (PGID)"
+    label: "Group ID"
     type: number
     default: 1000
-    description: "The group ID for file permissions."
+    description: "The group ID for file permissions"
+
   - name: TZ
     label: "Timezone"
     type: string
-    default: "Etc/UTC"
-    description: "The timezone for the container, e.g., America/New_York."
+    default: "America/New_York"
+    description: "Timezone for the container"
+
   - name: SERVERURL
-    label: "Server URL"
+    label: "Server URL or IP"
     type: string
     default: "auto"
-    description: "The public IP address or domain name of the WireGuard server."
+    description: "External IP or domain for clients to connect to (use 'auto' for automatic detection)"
+
   - name: SERVERPORT
     label: "Server Port"
     type: number
     default: 51820
-    description: "The port for the WireGuard server."
+    description: "External port for WireGuard (UDP)"
+
   - name: PEERS
-    label: "Peers"
-    type: string
-    default: "1"
-    description: "The number of peer configurations to generate."
+    label: "Number of Peers"
+    type: number
+    default: 1
+    description: "Number of peer config files to generate (or comma-separated peer names)"
+
   - name: PEERDNS
-    label: "Peer DNS"
+    label: "Peer DNS Server"
     type: string
     default: "auto"
-    description: "The DNS server to use for peers."
+    description: "DNS server for peers (use 'auto' or specify like 1.1.1.1)"
+
   - name: INTERNAL_SUBNET
     label: "Internal Subnet"
     type: string
     default: "10.13.13.0"
-    description: "The internal subnet for the VPN."
+    description: "Internal subnet for the WireGuard network"
+
   - name: ALLOWEDIPS
     label: "Allowed IPs"
     type: string
     default: "0.0.0.0/0"
-    description: "The IPs that are allowed to connect to the VPN."
-  - name: CONFIG_PATH
-    label: "Config Path"
-    type: path
-    default: "/config"
-    description: "The host path to store WireGuard's configuration."
+    description: "IPs/Ranges that peers are allowed to route (0.0.0.0/0 for all traffic through VPN)"
+
+  - name: CONFIG_DIR
+    label: "Config Directory"
+    type: directory
+    default: "/etc/wireguard"
+    container_path: "/config"
+    description: "Directory for WireGuard configuration and peer configs"
 
 ports:
-  - name: "WireGuard"
+  - name: WIREGUARD_UDP
     host: 51820
     container: 51820
-    protocol: "udp"
-    description: "The port for WireGuard connections."
+    protocol: udp
+    description: "WireGuard VPN port (UDP)"

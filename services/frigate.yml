@@ -1,0 +1,49 @@
+name: frigate
+description: "Open source NVR with real-time AI object detection. Monitor security cameras with person, vehicle, and animal detection. Works with most IP cameras."
+image: ghcr.io/blakeblackshear/frigate:stable
+
+variables:
+  - name: FRIGATE_CONFIG
+    label: "Config Directory"
+    type: directory
+    default: "/var/lib/frigate/config"
+    container_path: "/config"
+    description: "Directory for Frigate configuration files"
+
+  - name: FRIGATE_MEDIA
+    label: "Media Directory"
+    type: directory
+    default: "/var/lib/frigate/media"
+    container_path: "/media/frigate"
+    description: "Directory for recorded video clips and snapshots"
+
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+  - name: FRIGATE_RTSP_PASSWORD
+    label: "RTSP Restream Password"
+    type: string
+    default: "password"
+    description: "Password for RTSP restreaming (CHANGE THIS!)"
+
+ports:
+  - name: WEB_UI
+    host: 5000
+    container: 5000
+    protocol: tcp
+    description: "Web interface for Frigate"
+
+  - name: RTSP
+    host: 8554
+    container: 8554
+    protocol: tcp
+    description: "RTSP restreaming port"
+
+  - name: WEBRTC
+    host: 8555
+    container: 8555
+    protocol: tcp
+    description: "WebRTC streaming port"

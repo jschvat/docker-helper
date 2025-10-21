@@ -1,0 +1,17 @@
+name: excalidraw
+description: "Virtual whiteboard for sketching hand-drawn like diagrams. Collaborative, open source, and privacy-focused. Perfect for brainstorming and visual planning."
+image: excalidraw/excalidraw:latest
+
+variables:
+  - name: TZ
+    label: "Timezone"
+    type: string
+    default: "America/New_York"
+    description: "Timezone for the container"
+
+ports:
+  - name: WEB_UI
+    host: 8086
+    container: 80
+    protocol: tcp
+    description: "Web interface for Excalidraw"
