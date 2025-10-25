@@ -258,43 +258,73 @@ install_python_deps() {
 
     case "$OS" in
         ubuntu|debian|linuxmint|pop)
-            sudo apt-get install -y python3 python3-pip python3-venv \
+            sudo apt-get install -y \
+                python3 python3-pip python3-venv \
                 python3-gi python3-gi-cairo gir1.2-gtk-3.0 \
-                libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev \
+                libgirepository1.0-dev libcairo2-dev \
+                gcc g++ pkg-config python3-dev \
+                gir1.2-vte-2.91 libvte-2.91-dev \
+                gir1.2-gdkpixbuf-2.0 libgdk-pixbuf2.0-dev \
+                gir1.2-pango-1.0 libpango1.0-dev \
                 openssh-client
             ;;
         fedora)
-            sudo dnf install -y python3 python3-pip \
-                python3-gobject gtk3 cairo-gobject-devel gobject-introspection-devel \
-                gcc pkg-config python3-devel cairo-devel \
+            sudo dnf install -y \
+                python3 python3-pip python3-devel \
+                python3-gobject gtk3 gtk3-devel \
+                cairo-gobject-devel cairo-devel \
+                gobject-introspection-devel \
+                gcc gcc-c++ pkg-config \
+                vte291 vte291-devel \
+                gdk-pixbuf2 gdk-pixbuf2-devel \
+                pango pango-devel \
                 openssh-clients
             ;;
         centos|rhel|rocky|almalinux)
-            sudo yum install -y python3 python3-pip \
-                python3-gobject gtk3 cairo-gobject-devel gobject-introspection-devel \
-                gcc pkg-config python3-devel cairo-devel \
+            sudo yum install -y \
+                python3 python3-pip python3-devel \
+                python3-gobject gtk3 gtk3-devel \
+                cairo-gobject-devel cairo-devel \
+                gobject-introspection-devel \
+                gcc gcc-c++ pkg-config \
+                vte291 vte291-devel \
+                gdk-pixbuf2 gdk-pixbuf2-devel \
+                pango pango-devel \
                 openssh-clients
             ;;
         arch|manjaro)
-            sudo pacman -S --noconfirm python python-pip python-gobject gtk3 cairo gobject-introspection \
+            sudo pacman -S --noconfirm \
+                python python-pip \
+                python-gobject gtk3 \
+                cairo gobject-introspection \
+                gcc pkg-config \
+                vte3 gdk-pixbuf2 pango \
                 openssh
             ;;
         opensuse|opensuse-leap|opensuse-tumbleweed|sles)
-            sudo zypper install -y python3 python3-pip \
-                python3-gobject python3-gobject-Gdk typelib-1_0-Gtk-3_0 \
-                gobject-introspection-devel gcc pkg-config python3-devel cairo-devel \
+            sudo zypper install -y \
+                python3 python3-pip python3-devel \
+                python3-gobject python3-gobject-Gdk \
+                typelib-1_0-Gtk-3_0 gtk3-devel \
+                gobject-introspection-devel \
+                gcc gcc-c++ pkg-config \
+                cairo-devel \
+                typelib-1_0-Vte-2_91 vte-devel \
+                typelib-1_0-GdkPixbuf-2_0 gdk-pixbuf-devel \
+                typelib-1_0-Pango-1_0 pango-devel \
                 openssh
             ;;
     esac
 
-    log_success "Python and system dependencies installed (including SSH client for remote Docker)"
+    log_success "Python and system dependencies installed (including all PyGObject requirements)"
 }
 
 # Install docker_helper
 install_docker_helper() {
-    log_info "Installing docker_helper..."
+    log_info "Installing docker_helper to /opt/docker-helper..."
 
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    INSTALL_DIR="/opt/docker-helper"
 
     # Check if requirements.txt exists
     if [ ! -f "$SCRIPT_DIR/requirements.txt" ]; then
@@ -302,57 +332,60 @@ install_docker_helper() {
         exit 1
     fi
 
-    # Create virtual environment (optional but recommended)
-    read -p "Do you want to install docker_helper in a virtual environment? (Y/n): " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-        log_info "Creating virtual environment..."
-        python3 -m venv "$SCRIPT_DIR/venv"
-        source "$SCRIPT_DIR/venv/bin/activate"
-        log_success "Virtual environment created and activated"
+    # Create installation directory
+    sudo mkdir -p "$INSTALL_DIR"
 
-        # Upgrade pip
-        pip install --upgrade pip
+    # Copy all files to installation directory
+    log_info "Copying files to $INSTALL_DIR..."
+    sudo cp -r "$SCRIPT_DIR"/* "$INSTALL_DIR/"
 
-        # Install requirements
-        log_info "Installing Python requirements..."
-        pip install -r "$SCRIPT_DIR/requirements.txt"
+    # Set ownership
+    sudo chown -R root:root "$INSTALL_DIR"
 
-        log_success "docker_helper installed in virtual environment"
-        log_info "To use docker_helper, activate the virtual environment first:"
-        log_info "  source $SCRIPT_DIR/venv/bin/activate"
-        log_info "  python main.py --help"
-    else
-        # Install system-wide (requires sudo for some packages)
-        log_info "Installing Python requirements system-wide..."
-        pip3 install --user -r "$SCRIPT_DIR/requirements.txt"
+    # Install Python dependencies system-wide
+    log_info "Installing Python requirements..."
+    sudo pip3 install -r "$INSTALL_DIR/requirements.txt"
 
-        log_success "docker_helper installed system-wide"
-        log_info "You can now run docker_helper with:"
-        log_info "  python3 $SCRIPT_DIR/main.py --help"
-    fi
+    log_success "docker_helper files installed to $INSTALL_DIR"
 
-    # Make main.py executable
-    chmod +x "$SCRIPT_DIR/main.py" 2>/dev/null || true
-
-    # Optionally create a symlink or alias
-    read -p "Do you want to create a symlink to /usr/local/bin/docker-helper? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        if [ -d "$SCRIPT_DIR/venv" ]; then
-            # Create wrapper script for venv
-            cat > /tmp/docker-helper << EOF
+    # Create wrapper script in /usr/local/bin
+    log_info "Creating command-line wrapper..."
+    sudo cat > /usr/local/bin/docker-helper << 'EOF'
 #!/bin/bash
-source "$SCRIPT_DIR/venv/bin/activate"
-python "$SCRIPT_DIR/main.py" "\$@"
+# Docker Helper command-line wrapper
+exec python3 /opt/docker-helper/main.py "$@"
 EOF
-            sudo mv /tmp/docker-helper /usr/local/bin/docker-helper
-            sudo chmod +x /usr/local/bin/docker-helper
-        else
-            sudo ln -sf "$SCRIPT_DIR/main.py" /usr/local/bin/docker-helper
-        fi
-        log_success "Symlink created: /usr/local/bin/docker-helper"
+    sudo chmod +x /usr/local/bin/docker-helper
+
+    log_success "Command-line tool installed: docker-helper"
+
+    # Create desktop entry for GUI
+    log_info "Creating desktop launcher..."
+    sudo cat > /usr/share/applications/docker-helper.desktop << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Docker Helper
+Comment=Docker Container Management Tool
+Exec=/usr/local/bin/docker-helper --gui
+Icon=docker
+Terminal=false
+Categories=System;Utility;
+Keywords=docker;container;management;
+StartupNotify=true
+EOF
+
+    log_success "Desktop launcher created"
+
+    # Update desktop database
+    if command -v update-desktop-database &> /dev/null; then
+        sudo update-desktop-database /usr/share/applications 2>/dev/null || true
     fi
+
+    log_info "Installation complete!"
+    log_info "You can run docker-helper from:"
+    log_info "  - Command line: docker-helper --help"
+    log_info "  - GUI: docker-helper --gui (or from your applications menu)"
 }
 
 # Test Docker installation
@@ -437,9 +470,14 @@ main() {
     log_info "Docker version: $(docker --version)"
     log_info "Docker Compose version: $(docker compose version)"
     echo
+    log_info "Docker Helper has been installed to: /opt/docker-helper"
+    echo
     log_info "To get started with docker_helper:"
-    log_info "  python3 main.py --help"
-    log_info "  python3 main.py --gui  (for GUI interface)"
+    log_info "  Command line: docker-helper --help"
+    log_info "  GUI: docker-helper --gui"
+    log_info "  Or find 'Docker Helper' in your applications menu"
+    echo
+    log_info "Available services: $(ls /opt/docker-helper/services/*.yml 2>/dev/null | wc -l) service configurations"
     echo
 }
 

@@ -59,14 +59,82 @@ def handle_configure(token, domain):
         yaml.dump({'duckdns': {'token': token, 'domain': domain}}, f)
     return "DuckDNS settings updated."
 
+# Determine the services directory path
+def get_services_directory():
+    """
+    Get the path to the services directory.
+
+    Searches in the following order:
+    1. /opt/docker-helper/services (system installation)
+    2. ./services (development/local installation)
+    3. <script_dir>/services (relative to this file)
+
+    Returns:
+        str: Path to the services directory
+
+    Raises:
+        FileNotFoundError: If services directory cannot be found
+    """
+    # Try system installation path first
+    if os.path.exists('/opt/docker-helper/services'):
+        return '/opt/docker-helper/services'
+
+    # Try current directory
+    if os.path.exists('services'):
+        return 'services'
+
+    # Try relative to this script's location
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    services_dir = os.path.join(script_dir, 'services')
+    if os.path.exists(services_dir):
+        return services_dir
+
+    raise FileNotFoundError("Services directory not found. Please ensure docker-helper is installed correctly.")
+
+def load_service_config(service_name):
+    """
+    Load a service configuration from a YAML file.
+
+    Args:
+        service_name: Name of the service (without .yml extension)
+
+    Returns:
+        dict: Service configuration
+
+    Raises:
+        FileNotFoundError: If service configuration file doesn't exist
+        yaml.YAMLError: If YAML is invalid
+    """
+    services_dir = get_services_directory()
+    service_file = os.path.join(services_dir, f"{service_name}.yml")
+
+    if not os.path.exists(service_file):
+        raise FileNotFoundError(f"Service configuration not found: {service_name}")
+
+    with open(service_file, 'r') as f:
+        service_config = yaml.safe_load(f)
+
+    logging.info(f"Loaded service configuration: {service_name}")
+    return service_config
+
 def get_available_services():
+    """
+    Get a list of all available service configurations.
+
+    Returns:
+        list: List of service configuration dictionaries
+    """
     services = []
-    if not os.path.exists('services'):
+    try:
+        services_dir = get_services_directory()
+    except FileNotFoundError:
+        logging.warning("Services directory not found")
         return services
-    for filename in os.listdir('services'):
+
+    for filename in os.listdir(services_dir):
         if filename.endswith('.yml'):
             try:
-                with open(f'services/{filename}', 'r') as f:
+                with open(os.path.join(services_dir, filename), 'r') as f:
                     services.append(yaml.safe_load(f))
             except yaml.YAMLError as e:
                 logging.error(f"Error parsing service definition file {filename}: {e}")
@@ -75,21 +143,52 @@ def get_available_services():
 def get_installed_services(client):
     return [container.name for container in client.containers.list(all=True)]
 
-def install_service(service_config, config_values):
-    try:
-        command = ["docker", "run", "-d"]
+def install_service(client, service_config, config_values):
+    """
+    Install (create and start) a Docker container from a service configuration.
 
-        # Use custom container name if provided, otherwise use service name
+    Args:
+        client: Docker client instance
+        service_config: Service definition dictionary from YAML
+        config_values: User-provided configuration values
+
+    Returns:
+        str: Success message with container ID
+
+    Raises:
+        ValueError: If service configuration is invalid
+        docker.errors.DockerException: If Docker operation fails
+    """
+    try:
+        # Validate service configuration
+        if 'name' not in service_config:
+            raise ValueError("Service configuration missing 'name' field")
+        if 'image' not in service_config:
+            raise ValueError("Service configuration missing 'image' field")
+
+        service_name = service_config['name']
+        image = service_config['image']
+
+        # Validate and get container name
         container_name = config_values.get('container_name')
         if not container_name:
-            container_name = service_config.get('name', 'default-service-name')
+            container_name = service_name
 
-        command.extend(["--name", container_name])
+        # Validate container name (Docker naming rules)
+        import re
+        if not re.match(r'^[a-zA-Z0-9][a-zA-Z0-9_.-]*$', container_name):
+            raise ValueError(f"Invalid container name: {container_name}. Must match [a-zA-Z0-9][a-zA-Z0-9_.-]*")
 
-        # Process variables (environment and volumes)
+        logging.info(f"Installing service '{service_name}' as container '{container_name}'")
+
+        # Build environment variables
+        environment = {}
+        volumes = {}
+
+        # Process variables
         for var in service_config.get('variables', []):
             var_name = var['name']
-            user_value = config_values['variables'].get(var_name)
+            user_value = config_values.get('variables', {}).get(var_name)
 
             if user_value is None:
                 continue
@@ -98,65 +197,230 @@ def install_service(service_config, config_values):
 
             # Check if this is a path/directory with volume mapping enabled
             if var_type in ['path', 'directory']:
-                # Check if volume mapping is enabled for this variable
                 volume_mappings = config_values.get('volume_mappings', {})
-                if var_name in volume_mappings and volume_mappings[var_name]['enabled']:
+                if var_name in volume_mappings and volume_mappings[var_name].get('enabled'):
                     # Use volume mapping
-                    host_path = volume_mappings[var_name]['host_path']
-                    container_path = volume_mappings[var_name]['container_path']
+                    host_path = volume_mappings[var_name].get('host_path')
+                    container_path = volume_mappings[var_name].get('container_path')
                     if host_path and container_path:
-                        command.extend(["-v", f"{host_path}:{container_path}"])
+                        volumes[host_path] = {'bind': container_path, 'mode': 'rw'}
+                        logging.info(f"Volume mapping: {host_path} -> {container_path}")
                 else:
                     # Set as environment variable if no volume mapping
-                    command.extend(["-e", f"{var_name}={user_value}"])
-            elif var_type == 'path':
-                # Old behavior for backward compatibility
-                container_path = var.get('default', '') # The YAML default is the container path
-                command.extend(["-v", f"{user_value}:{container_path}"])
+                    environment[var_name] = str(user_value)
             else:
-                command.extend(["-e", f"{var_name}={user_value}"])
+                # Regular environment variable
+                environment[var_name] = str(user_value)
 
-        # Process ports
+        # Build port mappings
+        ports = {}
         for port in service_config.get('ports', []):
             port_name = port['name']
-            host_port = config_values['ports'].get(port_name)
+            host_port = config_values.get('ports', {}).get(port_name)
             if host_port is not None:
                 container_port = port['container']
                 protocol = port.get('protocol', 'tcp')
-                command.extend(["-p", f"{host_port}:{container_port}/{protocol}"])
+                port_key = f"{container_port}/{protocol}"
+                ports[port_key] = host_port
+                logging.info(f"Port mapping: {host_port} -> {container_port}/{protocol}")
 
-        # Add image name at the end
-        image = service_config.get('image')
-        if not image:
-            return "Error: Image name not found in service configuration."
-        command.append(image)
+        # Pull image if not present
+        logging.info(f"Pulling image: {image}")
+        try:
+            client.images.pull(image)
+        except docker.errors.ImageNotFound:
+            raise ValueError(f"Image not found: {image}")
+        except Exception as e:
+            logging.warning(f"Failed to pull image {image}: {e}. Will try to use local image.")
 
-        # For now, just return the command as a string
-        return "Generated command:\n" + " ".join(command)
+        # Create and start container
+        logging.info(f"Creating container '{container_name}' from image '{image}'")
+        container = client.containers.run(
+            image=image,
+            name=container_name,
+            environment=environment,
+            ports=ports,
+            volumes=volumes,
+            detach=True,
+            restart_policy={"Name": "unless-stopped"}
+        )
 
+        logging.info(f"Container '{container_name}' created successfully with ID: {container.short_id}")
+        return f"✓ Service '{service_name}' installed successfully as container '{container_name}' (ID: {container.short_id})"
+
+    except docker.errors.ContainerError as e:
+        error_msg = f"Container failed to start: {e}"
+        logging.error(error_msg)
+        raise docker.errors.DockerException(error_msg)
+    except docker.errors.ImageNotFound as e:
+        error_msg = f"Image not found: {image}"
+        logging.error(error_msg)
+        raise docker.errors.DockerException(error_msg)
+    except docker.errors.APIError as e:
+        error_msg = f"Docker API error: {e}"
+        logging.error(error_msg)
+        raise docker.errors.DockerException(error_msg)
     except Exception as e:
-        logging.error(f"Error generating install command for {service_config.get('name')}: {e}")
-        return f"Error generating command: {e}"
+        logging.error(f"Error installing service '{service_config.get('name')}': {e}")
+        raise
 
 def uninstall_service(client, service_name):
-    logging.info(f"Uninstalling service: {service_name}")
-    # This is a test run, so we will not actually uninstall the service
-    return f"Service {service_name} would be uninstalled."
+    """
+    Uninstall (stop and remove) a Docker container.
+
+    Args:
+        client: Docker client instance
+        service_name: Name of the container to remove
+
+    Returns:
+        str: Success message
+
+    Raises:
+        docker.errors.NotFound: If container doesn't exist
+        docker.errors.APIError: If Docker operation fails
+    """
+    try:
+        logging.info(f"Uninstalling service: {service_name}")
+
+        # Get container
+        container = client.containers.get(service_name)
+
+        # Stop container if running
+        if container.status == 'running':
+            logging.info(f"Stopping container '{service_name}'")
+            container.stop(timeout=10)
+
+        # Remove container
+        logging.info(f"Removing container '{service_name}'")
+        container.remove()
+
+        logging.info(f"Container '{service_name}' uninstalled successfully")
+        return f"✓ Service '{service_name}' uninstalled successfully"
+
+    except docker.errors.NotFound:
+        error_msg = f"Container '{service_name}' not found"
+        logging.error(error_msg)
+        raise docker.errors.NotFound(error_msg)
+    except docker.errors.APIError as e:
+        error_msg = f"Failed to uninstall '{service_name}': {e}"
+        logging.error(error_msg)
+        raise docker.errors.APIError(error_msg)
 
 def start_service(client, service_name):
-    logging.info(f"Starting service: {service_name}")
-    # This is a test run, so we will not actually start the service
-    return f"Service {service_name} would be started."
+    """
+    Start a stopped Docker container.
+
+    Args:
+        client: Docker client instance
+        service_name: Name of the container to start
+
+    Returns:
+        str: Success message
+
+    Raises:
+        docker.errors.NotFound: If container doesn't exist
+        docker.errors.APIError: If Docker operation fails
+    """
+    try:
+        logging.info(f"Starting service: {service_name}")
+
+        # Get container
+        container = client.containers.get(service_name)
+
+        # Check if already running
+        if container.status == 'running':
+            return f"Service '{service_name}' is already running"
+
+        # Start container
+        container.start()
+
+        logging.info(f"Container '{service_name}' started successfully")
+        return f"✓ Service '{service_name}' started successfully"
+
+    except docker.errors.NotFound:
+        error_msg = f"Container '{service_name}' not found"
+        logging.error(error_msg)
+        raise docker.errors.NotFound(error_msg)
+    except docker.errors.APIError as e:
+        error_msg = f"Failed to start '{service_name}': {e}"
+        logging.error(error_msg)
+        raise docker.errors.APIError(error_msg)
 
 def stop_service(client, service_name):
-    logging.info(f"Stopping service: {service_name}")
-    # This is a test run, so we will not actually stop the service
-    return f"Service {service_name} would be stopped."
+    """
+    Stop a running Docker container.
+
+    Args:
+        client: Docker client instance
+        service_name: Name of the container to stop
+
+    Returns:
+        str: Success message
+
+    Raises:
+        docker.errors.NotFound: If container doesn't exist
+        docker.errors.APIError: If Docker operation fails
+    """
+    try:
+        logging.info(f"Stopping service: {service_name}")
+
+        # Get container
+        container = client.containers.get(service_name)
+
+        # Check if already stopped
+        if container.status != 'running':
+            return f"Service '{service_name}' is not running"
+
+        # Stop container with 10 second timeout
+        container.stop(timeout=10)
+
+        logging.info(f"Container '{service_name}' stopped successfully")
+        return f"✓ Service '{service_name}' stopped successfully"
+
+    except docker.errors.NotFound:
+        error_msg = f"Container '{service_name}' not found"
+        logging.error(error_msg)
+        raise docker.errors.NotFound(error_msg)
+    except docker.errors.APIError as e:
+        error_msg = f"Failed to stop '{service_name}': {e}"
+        logging.error(error_msg)
+        raise docker.errors.APIError(error_msg)
 
 def restart_service(client, service_name):
-    logging.info(f"Restarting service: {service_name}")
-    # This is a test run, so we will not actually restart the service
-    return f"Service {service_name} would be restarted."
+    """
+    Restart a Docker container.
+
+    Args:
+        client: Docker client instance
+        service_name: Name of the container to restart
+
+    Returns:
+        str: Success message
+
+    Raises:
+        docker.errors.NotFound: If container doesn't exist
+        docker.errors.APIError: If Docker operation fails
+    """
+    try:
+        logging.info(f"Restarting service: {service_name}")
+
+        # Get container
+        container = client.containers.get(service_name)
+
+        # Restart container with 10 second timeout
+        container.restart(timeout=10)
+
+        logging.info(f"Container '{service_name}' restarted successfully")
+        return f"✓ Service '{service_name}' restarted successfully"
+
+    except docker.errors.NotFound:
+        error_msg = f"Container '{service_name}' not found"
+        logging.error(error_msg)
+        raise docker.errors.NotFound(error_msg)
+    except docker.errors.APIError as e:
+        error_msg = f"Failed to restart '{service_name}': {e}"
+        logging.error(error_msg)
+        raise docker.errors.APIError(error_msg)
 
 def get_status(client, services):
     statuses = []
@@ -283,9 +547,98 @@ def get_full_container_details(client, container_id):
 
 
 def update_service(client, service_name):
-    logging.info(f"Updating service: {service_name}")
-    # This is a test run, so we will not actually update the service
-    return f"Service {service_name} would be updated."
+    """
+    Update a Docker container to the latest image version.
+
+    This recreates the container with the same configuration but latest image.
+
+    Args:
+        client: Docker client instance
+        service_name: Name of the container to update
+
+    Returns:
+        str: Success message
+
+    Raises:
+        docker.errors.NotFound: If container doesn't exist
+        docker.errors.APIError: If Docker operation fails
+    """
+    try:
+        logging.info(f"Updating service: {service_name}")
+
+        # Get existing container
+        old_container = client.containers.get(service_name)
+
+        # Get container configuration
+        config = old_container.attrs['Config']
+        host_config = old_container.attrs['HostConfig']
+
+        # Extract important settings
+        image = config['Image']
+        environment = config.get('Env', [])
+        volumes = host_config.get('Binds', [])
+        port_bindings = host_config.get('PortBindings', {})
+        restart_policy = host_config.get('RestartPolicy', {})
+
+        logging.info(f"Pulling latest image: {image}")
+
+        # Pull latest image
+        try:
+            client.images.pull(image)
+        except Exception as e:
+            logging.warning(f"Failed to pull image {image}: {e}")
+            return f"⚠ Failed to pull latest image for '{service_name}': {e}"
+
+        # Stop and remove old container
+        logging.info(f"Stopping old container '{service_name}'")
+        if old_container.status == 'running':
+            old_container.stop(timeout=10)
+
+        logging.info(f"Removing old container '{service_name}'")
+        old_container.remove()
+
+        # Parse volumes for new container
+        volume_dict = {}
+        if volumes:
+            for volume in volumes:
+                parts = volume.split(':')
+                if len(parts) >= 2:
+                    volume_dict[parts[0]] = {'bind': parts[1], 'mode': 'rw'}
+
+        # Parse port bindings
+        ports_dict = {}
+        if port_bindings:
+            for container_port, host_info in port_bindings.items():
+                if host_info:
+                    ports_dict[container_port] = host_info[0]['HostPort']
+
+        # Create new container with same configuration
+        logging.info(f"Creating updated container '{service_name}'")
+        new_container = client.containers.run(
+            image=image,
+            name=service_name,
+            environment=environment,
+            volumes=volume_dict,
+            ports=ports_dict,
+            detach=True,
+            restart_policy=restart_policy
+        )
+
+        logging.info(f"Container '{service_name}' updated successfully with ID: {new_container.short_id}")
+        return f"✓ Service '{service_name}' updated successfully (new ID: {new_container.short_id})"
+
+    except docker.errors.NotFound:
+        error_msg = f"Container '{service_name}' not found"
+        logging.error(error_msg)
+        raise docker.errors.NotFound(error_msg)
+    except docker.errors.APIError as e:
+        error_msg = f"Failed to update '{service_name}': {e}"
+        logging.error(error_msg)
+        raise docker.errors.APIError(error_msg)
+    except Exception as e:
+        error_msg = f"Error updating service '{service_name}': {e}"
+        logging.error(error_msg)
+        raise
 
 def test_container(client):
     logging.info("Starting test container...")

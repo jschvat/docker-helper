@@ -140,7 +140,41 @@ def main():
 
     if args.action == 'install':
         for service_name in args.services:
-            print(core.install_service(client, service_name))
+            try:
+                # Load service configuration
+                service_config = core.load_service_config(service_name)
+
+                # Collect configuration values from user
+                config_values = {}
+                if 'variables' in service_config:
+                    print(f"\nConfiguring {service_name}:")
+                    print(f"Description: {service_config.get('description', 'No description available')}\n")
+
+                    for variable in service_config['variables']:
+                        var_name = variable['name']
+                        var_label = variable.get('label', var_name)
+                        var_description = variable.get('description', '')
+                        var_default = variable.get('default', '')
+
+                        # Prompt user for value
+                        prompt = f"  {var_label}"
+                        if var_description:
+                            prompt += f" ({var_description})"
+                        if var_default:
+                            prompt += f" [default: {var_default}]"
+                        prompt += ": "
+
+                        user_input = input(prompt).strip()
+                        config_values[var_name] = user_input if user_input else var_default
+
+                # Install the service
+                result = core.install_service(client, service_config, config_values)
+                print(result)
+
+            except FileNotFoundError:
+                print(f"Error: Service configuration for '{service_name}' not found.")
+            except Exception as e:
+                print(f"Error installing {service_name}: {e}")
     elif args.action == 'uninstall':
         for service_name in args.services:
             print(core.uninstall_service(client, service_name))
